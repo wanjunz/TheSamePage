@@ -64,6 +64,7 @@ def search():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    # log user in
     if request.method == 'GET':
         return render_template("login.html")
     else:
@@ -88,3 +89,37 @@ def login():
 
         # Redirect user to home page
         return redirect("/")
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    # register user
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        # render error if one of fields left blank or confirmation not password
+        if not username or not password or not confirmation:
+            return render_template("register.html", message = "field left blank")
+        
+        if confirmation != password:
+            return render_template("register.html", message = "confirmation doesn't match password")
+        
+        # attempt to insert username
+        try:
+            executeSQL("INSERT INTO users (username, hash) VALUES(?, ?)", (username, generate_password_hash(password)), True)
+        except:
+            return render_template("register.html", message = "username taken")
+        return render_template("login.html")
+    if request.method == "GET":
+        return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    # log user out
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
