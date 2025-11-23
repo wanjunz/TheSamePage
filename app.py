@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, session
+import sqlite3
+from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
@@ -7,6 +9,24 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+def executeSQL(command, args, needCommit):
+    connection = sqlite3.connect('info.db')
+    db = connection.cursor()
+    db.execute(command, args)
+    val = db.fetchall()
+    if needCommit:
+        connection.commit()
+    connection.close()
+    return val
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
 
 @app.route('/')
 def home():
@@ -46,7 +66,25 @@ def search():
 def login():
     if request.method == 'GET':
         return render_template("login.html")
-    
+    else:
+        # forget user_id
+        session.clear()
 
-if __name__ == '__main__':
-    app.run(debug = True, host = "0.0.0.0", port = 3000)
+        # Ensure no fields left blank
+        if not request.form.get("username") or not request.form.get("password"):
+            return render_template("login.html", message = "field left blank")
+        
+        # Query database for username
+        rows = executeSQL("SELECT * FROM users WHERE username = ?", (request.form.get("username"),), False)
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(
+            rows[0]["hash"], request.form.get("password")
+        ):
+            return render_template("login.html", message = "invalid username/password")
+        
+        # Remember which user has logged in
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
