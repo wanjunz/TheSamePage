@@ -40,27 +40,6 @@ def contributions():
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():
-    if request.method == "POST":
-        query = request.form.get("query")
-        
-        # Call Google Books API
-        url = f"https://www.googleapis.com/books/v1/volumes?q={query}"
-        resp = requests.get(url)
-        data = resp.json()
-
-        books = []
-        if "items" in data:
-            for item in data["items"]:
-                info = item.get("volumeInfo", {})
-                books.append({
-                    "title": info.get("title"),
-                    "authors": info.get("authors", []),
-                    "thumbnail": info.get("imageLinks", {}).get("thumbnail"),
-                    "description": info.get("description")
-                })
-
-        return render_template("results.html", books=books, query=query)
-    
     return render_template("search.html")
 
 @app.route("/api/search")
