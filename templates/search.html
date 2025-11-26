@@ -1,15 +1,54 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Search
+Search
 {% endblock %}
 
 {% block main %}
-<h1>Search</h1>
 
-<form action="/search" method="POST">
-    <input type="text" name="query" placeholder="Search for a book" required>
-    <button type="submit">Search</button>
-</form>
+<div class="container mt-4">
+
+    <h1>Search Books</h1>
+
+    <input autocomplete="off"
+           autofocus
+           placeholder="Search for a book..."
+           type="text"
+           class="form-control mb-3">
+
+    <!-- RESULTS GO HERE -->
+    <ul id="results" class="list-unstyled mt-3"></ul>
+
+</div>
+
+<script>
+    let input = document.querySelector("input");
+    let results = document.getElementById("results");
+
+    input.addEventListener("input", async function () {
+
+        let response = await fetch("/api/search?q=" + input.value);
+        let books = await response.json();
+
+        let html = "";
+
+        for (let i in books) {
+            let title = books[i].title.replace("<", "&lt;").replace(">", "&gt;");
+            let authors = books[i].authors.join(", ") || "Unknown";
+            let img = books[i].thumbnail ? `<img src="${books[i].thumbnail}" width="60">` : "";
+
+            html += `
+                <li class="d-flex gap-3 align-items-start mb-3">
+                    ${img}
+                    <div>
+                        <strong>${title}</strong><br>
+                        <small>${authors}</small>
+                    </div>
+                </li>`;
+        }
+
+        results.innerHTML = html;
+    });
+</script>
 
 {% endblock %}
