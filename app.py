@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
+import requests
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -61,6 +62,29 @@ def search():
         return render_template("results.html", books=books, query=query)
     
     return render_template("search.html")
+
+@app.route("/api/search")
+def search():
+    q = request.args.get("q")
+
+    if not q:
+        return jsonify([])
+
+    # Call Google Books API
+    url = f"https://www.googleapis.com/books/v1/volumes?q={q}"
+    data = requests.get(url).json()
+
+    books = []
+    if "items" in data:
+        for item in data["items"][:10]:  # limit results like CS50 example
+            info = item.get("volumeInfo", {})
+            books.append({
+                "title": info.get("title", "No title"),
+                "authors": info.get("authors", []),
+                "thumbnail": info.get("imageLinks", {}).get("thumbnail")
+            })
+
+    return jsonify(books)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
