@@ -1,6 +1,7 @@
 import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 import requests
+from urllib.parse import quote
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -44,18 +45,23 @@ def search():
 
 @app.route("/api/search")
 def apisearch():
+    
     q = request.args.get("q")
+    # intitle: restricts search to book titles only
+    q_strict = f'intitle:"{q}"'
 
+    # if no query, return empty list
     if not q:
         return jsonify([])
 
     # Call Google Books API
-    url = f"https://www.googleapis.com/books/v1/volumes?q={q}"
+    # quote makes the query handle spaces and special characters
+    url = f"https://www.googleapis.com/books/v1/volumes?q={quote(q_strict)}&maxResults=10"
     data = requests.get(url).json()
 
     books = []
     if "items" in data:
-        for item in data["items"][:10]:  # limit results like CS50 example
+        for item in data["items"][:10]:  # limit results to 10
             info = item.get("volumeInfo", {})
             books.append({
                 "title": info.get("title", "No title"),
