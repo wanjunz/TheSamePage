@@ -64,7 +64,7 @@ def search():
     return render_template("search.html")
 
 @app.route("/api/search")
-def search():
+def apisearch():
     q = request.args.get("q")
 
     if not q:
