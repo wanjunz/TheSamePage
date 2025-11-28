@@ -16,6 +16,8 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Executes sql command with ? arguments 
+# needCommit True if editing table values
 def executeSQL(command, args, needCommit):
     connection = sqlite3.connect('info.db')
     db = connection.cursor()
@@ -25,6 +27,7 @@ def executeSQL(command, args, needCommit):
         connection.commit()
     connection.close()
     return val
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -67,12 +70,17 @@ def apisearch():
     if "items" in data:
         for item in data["items"][:10]:  # limit results to 10
             info = item.get("volumeInfo", {})
-            books.append({
-                "title": info.get("title", "No title"),
-                "authors": info.get("authors", []),
-                "thumbnail": info.get("imageLinks", {}).get("thumbnail")
-            })
-
+            if 'volumeInfo' in item and 'imageLinks' in item['volumeInfo']:
+                books.append({
+                    "title": info.get("title", "No title"),
+                    "authors": info.get("authors", []),
+                    "thumbnail": info.get("imageLinks", {}).get("thumbnail")
+                })
+            else:
+                books.append({
+                    "title": info.get("title", "No title"),
+                    "authors": info.get("authors", []),
+                })
     return jsonify(books)
 
 @app.route('/forum', methods=['POST'])
@@ -80,6 +88,8 @@ def forum():
     title = request.form.get("title")   # book title passed from the button
     authors = request.form.get("authors") # book authors passed from the button
     thumbnail = request.form.get("thumbnail") # book thumbnail passed from the button
+    if not thumbnail: # set image to cover not found image
+        thumbnail = "../static/no-cover.jpg"
     return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail)
 
 @app.route('/login', methods=['POST', 'GET'])
