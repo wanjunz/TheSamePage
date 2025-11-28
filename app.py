@@ -90,7 +90,15 @@ def forum():
     thumbnail = request.form.get("thumbnail") # book thumbnail passed from the button
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
-    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail)
+    # if not in table then add it
+    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ?", (title, authors), False)
+    if len(row)!=1:
+        executeSQL("INSERT INTO chapters (title, author) VALUES (?, ?)", (title, authors), True)
+        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ?", (title, authors), False)
+    forumID = row[0][2]
+    # get comments for specific book
+    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forumID,),False)
+    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():

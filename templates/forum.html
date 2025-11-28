@@ -8,6 +8,13 @@
     <h1>Forum for {{ title }}</h1>
     <h5>Author(s): {{ authors }}</h5>
     <img src="{{thumbnail}} " width="100" alt="Book Cover">
-
-
+    <form>
+        <textarea name = "message" rows = "10" cols = "100" placeholder = "type comment here"></textarea>
+        <input name = "page" placeholder = "page" type = "number">
+        <button type = button>Upload Comment</button>
+    </form>
+    {% for comment in comments %}
+        {{comment["username"]}} {{comment["time"]}}
+        {{comment["comment"]}}
+    {% endfor %}
 {% endblock %}
