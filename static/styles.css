@@ -1,0 +1,93 @@
+/* TODO: change font */
+
+
+/* Color Variables */
+:root {
+    --dark: #031926;
+    --dark-teal: #468189;
+    --medium-teal: #77ACA2;
+    --light-teal: #9DBEBB;
+    --lightest-teal: #c0d8d6;
+    --cream: #F4E9CD;
+    --light-cream: #eee9db;
+    --dark-cream: #e3dac3;
+    
+    --spacing-unit: 16px;
+}
+
+/* Navigation Bar Styling */
+nav.navbar {
+    background-color: var(--dark-teal);
+    border-bottom: 3px solid var(--dark);     
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-color: var(--dark);
+}
+
+/* Brand "The Same Page" */
+.navbar-brand span {
+    color: var(--light-cream);
+    background-color: var(--dark-teal);
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+/* Nav links */
+.navbar-nav .nav-link {
+    color: var(--light-cream);
+    font-weight: 500;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Hover state */
+.navbar-nav .nav-link:hover { 
+    color: var(--dark-teal); /* TODO need to change this so it doesnt blend into background */
+    border-radius: 6px;
+}
+
+/* Active or current page link */
+.navbar-nav .nav-link.active {
+    color: var(--dark-teal);
+    background-color: var(--dark-teal);     
+    border-radius: 6px;
+}
+
+/* Hamburger icon for mobile */
+.navbar-toggler {
+    border-color: var(--dark-teal);
+}
+
+.navbar-toggler-icon {
+    filter: brightness(0) invert(0.8);       
+}
+
+/* Background color of expanded mobile menu */
+.navbar-collapse {
+    background-color: var(--dark-teal); /* rest of navbar color */
+}
+
+h1 {
+    color: var(--dark-teal);
+}
+
+body {
+    background-color: var(--light-cream);
+}
+
+
+/* Style for search.html elements */
+
+#find-forum {
+    background-color: var(--lightest-teal);
+    color: var(--dark);
+    border-color: var(--dark-teal);
+}
+
+#find-forum:hover {
+    background-color: var(--light-teal);
+    color: var(--dark);
+    border-color: var(--dark-teal);
+}
