@@ -26,27 +26,51 @@ Search
     let input = document.querySelector("input");
     let results = document.getElementById("results");
 
+    let lastQuery = "";
+
     input.addEventListener("input", async function () {
+    
+    // .trim() removes whitespace from both ends of a string
+    let q = input.value.trim();
+    lastQuery = q;
 
-        let response = await fetch("/api/search?q=" + input.value);
-        let books = await response.json();
+    // If empty: clear results immediately and do not fetch
+    if (q === "") {
+        results.innerHTML = "";
+        return;
+    }
 
-        let html = "";
+    let response = await fetch("/api/search?q=" + q);
+    let books = await response.json();
 
-        for (let i in books) {
-            let title = books[i].title.replace("<", "&lt;").replace(">", "&gt;");
-            let authors = books[i].authors.join(", ") || "Unknown";
-            let img = books[i].thumbnail ? `<img src="${books[i].thumbnail}" width="60">` : "";
+    // If the input changed while async fetch was running, ignore these results
+    // Since async function takes time to run, the user may have typed more characters. Only return search results if the query is still the same. So when the user has paused in their typing
+    if (q !== lastQuery) return;
 
-            html += `
-                <li class="d-flex gap-3 align-items-start mb-3">
-                    ${img}
-                    <div>
-                        <strong>${title}</strong><br>
-                        <small>${authors}</small>
-                    </div>
-                </li>`;
-        }
+    let html = "";
+    for (let b of books) {
+        let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
+        let authors = b.authors.join(", ") || "Unknown";
+        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
+
+        html += `
+            <li class="d-flex gap-3 align-items-start mb-3">
+                <!-- POST form sends user to forum.html -->
+                <div>
+                    <form action="/forum" method="post">
+                        <input type="hidden" name="title" value="${title}">
+                        <input type = "hidden" name="authors" value="${authors}">
+                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
+                        <button class="btn btn-primary" id = "find-forum">Find Forum</button>
+                    </form>
+                </div>
+                ${img}
+                <div>
+                    <strong>${title}</strong><br>
+                    <small>${authors}</small>
+                </div>
+            </li>`;
+    }
 
         results.innerHTML = html;
     });

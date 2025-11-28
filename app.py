@@ -1,9 +1,13 @@
-import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
+# libraries for API requests and search 
 import requests
 from urllib.parse import quote
+# libraries for session management and password hashing (for login / register)
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+
+#library for database management
+import sqlite3
 
 app = Flask(__name__)
 
@@ -70,6 +74,13 @@ def apisearch():
             })
 
     return jsonify(books)
+
+@app.route('/forum', methods=['POST'])
+def forum():
+    title = request.form.get("title")   # book title passed from the button
+    authors = request.form.get("authors") # book authors passed from the button
+    thumbnail = request.form.get("thumbnail") # book thumbnail passed from the button
+    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
