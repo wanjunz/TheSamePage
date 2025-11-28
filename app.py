@@ -5,7 +5,8 @@ from urllib.parse import quote
 # libraries for session management and password hashing (for login / register)
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-
+# library to get time
+from datetime import datetime
 #library for database management
 import sqlite3
 
@@ -161,3 +162,27 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+@app.route("/comment", methods = ["POST"])
+def comment():
+    # adds user comment to database and then shows page with it on
+    if request.method == "POST":
+        parent_id = request.form.get("parent_id")
+        # not a reply to a comment
+        forum_id = request.form.get("forum_id")
+        if not parent_id:
+            forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (forum_id,),False)
+            # if invalid forum_id, return home
+            if len(forumIDArray)!=1:
+                return redirect("/")
+            comment = request.form.get("comment")
+            user_id = session.get('id')
+            username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
+            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            page = request.form.get("page")
+            # general comment, no page inputted
+            if not page:
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)   
+                # return corresponding forum.html 
+                # return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)

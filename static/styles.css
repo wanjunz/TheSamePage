@@ -91,3 +91,9 @@ body {
     color: var(--dark);
     border-color: var(--dark-teal);
 }
+
+/* styling for comment boxes */
+
+textarea{
+    width: 80vw;
+}

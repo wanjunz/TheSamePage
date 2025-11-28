@@ -7,14 +7,37 @@
 {% block main %}
     <h1>Forum for {{ title }}</h1>
     <h5>Author(s): {{ authors }}</h5>
-    <img src="{{thumbnail}} " width="100" alt="Book Cover">
-    <form>
-        <textarea name = "message" rows = "10" cols = "100" placeholder = "type comment here"></textarea>
-        <input name = "page" placeholder = "page" type = "number">
-        <button type = button>Upload Comment</button>
+    <div class = "mb-3">
+        <img src="{{thumbnail}} " width="100" alt="Book Cover">
+    </div>
+    <!-- submit comment for overall forum -->
+    <form action = "/comment" method ="post">
+        <div class = "mb-3">
+            <textarea name = "message" placeholder = "type comment here"></textarea>
+        </div>
+        <div class = "mb-3">
+            <input name = "page" placeholder = "page on (if applicable)" type = "number" min="0" oninput="validity.valid||(value='');">
+            <input name = "forum_id" type = "hidden" value = '{{forumID}}'> 
+        </div>
+        <div class = "mb-3">
+            <button type = button>Upload Comment</button>
+        </div>
     </form>
+    <!-- display existing comments -->
     {% for comment in comments %}
-        {{comment["username"]}} {{comment["time"]}}
-        {{comment["comment"]}}
+        {{comment[0]}} {{comment[3]}}({{comment[5]}})
+        {{comment[1]}}
+        <form action = "/comment" method ="post">
+            <div class = "mb-3">
+                <textarea name = "message" placeholder = 'reply to {{comment[0]}} '></textarea>
+            </div>
+            <div class = "mb-3">
+                <input name = "parent_id" type = "hidden" value = '{{comment[2]}}'> 
+                <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
+            </div>
+            <div class = "mb-3">
+                <button type = button>Reply</button>
+            </div>
+        </form>
     {% endfor %}
 {% endblock %}
