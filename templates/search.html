@@ -30,7 +30,7 @@ Search
 
     input.addEventListener("input", async function () {
     
-    // .trim() removes whitespace from both ends of a string
+    // .trim() removes whitespace from both ends of the query string
     let q = input.value.trim();
     lastQuery = q;
 
@@ -47,13 +47,40 @@ Search
     // Since async function takes time to run, the user may have typed more characters. Only return search results if the query is still the same. So when the user has paused in their typing
     if (q !== lastQuery) return;
 
+    function clean(str) {
+        return str.toLowerCase().replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '');
+    }
+
+    let clean_query = clean(q).split(" ");
+
     let html = "";
+    // Loop through the books returned from API and retrieve the titles, authors, and covers 
     for (let b of books) {
+        // Used to check if any query words are in the title
+        var titleQueryCheck = true;
+
+        // Retrieve info about the books
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
         let authors = b.authors.join(", ") || "Unknown";
         let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
 
-        html += `
+        // Loop through each word searched in teh query. If any of the words are in the title, then display this book.
+        // This is needed because Google Books API searches the subtitles too.
+        console.log("q: ", q);
+        let clean_title = clean(title);
+        
+        for (let word of clean_query) {
+            console.log("word: ", word);
+            if (!clean_title.includes(word)) {
+                titleQueryCheck = false;
+                console.log("check: ", titleQueryCheck);
+                console.log("word: ", word);
+                console.log("title: ", title);
+                break;
+            }
+        }
+        if (titleQueryCheck) {
+            html += `
             <li class="d-flex gap-3 align-items-start mb-3">
                 <!-- POST form sends user to forum.html -->
                 <div>
@@ -70,6 +97,9 @@ Search
                     <small>${authors}</small>
                 </div>
             </li>`;
+
+        }
+        
     }
 
         results.innerHTML = html;
