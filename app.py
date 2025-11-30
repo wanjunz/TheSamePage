@@ -75,20 +75,24 @@ def apisearch():
                 books.append({
                     "title": info.get("title", "No title"),
                     "authors": info.get("authors", []),
-                    "thumbnail": info.get("imageLinks", {}).get("thumbnail")
+                    "thumbnail": info.get("imageLinks", {}).get("thumbnail"),
+                    "pages" : info.get("pageCount", 0)
                 })
             else:
                 books.append({
                     "title": info.get("title", "No title"),
                     "authors": info.get("authors", []),
+                    "pageCount" : info.get("pageCount", 0)
                 })
     return jsonify(books)
 
 @app.route('/forum', methods=['POST'])
 def forum():
-    title = request.form.get("title")   # book title passed from the button
-    authors = request.form.get("authors") # book authors passed from the button
-    thumbnail = request.form.get("thumbnail") # book thumbnail passed from the button
+    title = request.form.get("title")   # book title passed from search.html
+    authors = request.form.get("authors") # book authors passed from search.html
+    thumbnail = request.form.get("thumbnail") # book thumbnail passed from search.html
+    pageCount = request.form.get("pageCount") # book page count passed from search.html
+
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
     # if not in table then add it
@@ -98,8 +102,8 @@ def forum():
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ?", (title, authors), False)
     forumID = row[0][2]
     # get comments for specific book
-    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forumID,),False)
-    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)
+    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forumID,), False)
+    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments, pageCount = pageCount)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -170,6 +174,8 @@ def comment():
         parent_id = request.form.get("parent_id")
         # not a reply to a comment
         forum_id = request.form.get("forum_id")
+
+        # parent_id refers to the parent reply. If empty, then it's a regular comment, not a reply to a comment
         if not parent_id:
             forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (forum_id,),False)
             # if invalid forum_id, return home
@@ -181,8 +187,13 @@ def comment():
             time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             page = request.form.get("page")
+            pageCount = request.form.get("pageCount")
             # general comment, no page inputted
             if not page:
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)   
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)
+            else:
+                page = float(page)
+                pageCount = float(pageCount)
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, round(page/pageCount)), True)  
                 # return corresponding forum.html 
                 # return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)

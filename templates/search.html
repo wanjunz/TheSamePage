@@ -47,10 +47,12 @@ Search
     // Since async function takes time to run, the user may have typed more characters. Only return search results if the query is still the same. So when the user has paused in their typing
     if (q !== lastQuery) return;
 
+    // Removes special characters from a string and converts to lowercase
     function clean(str) {
         return str.toLowerCase().replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '');
     }
 
+    // Clean up the query
     let clean_query = clean(q).split(" ");
 
     let html = "";
@@ -61,21 +63,18 @@ Search
 
         // Retrieve info about the books
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
-        let authors = b.authors.join(", ") || "Unknown";
-        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
-
-        // Loop through each word searched in teh query. If any of the words are in the title, then display this book.
-        // This is needed because Google Books API searches the subtitles too.
-        console.log("q: ", q);
         let clean_title = clean(title);
+        let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
+        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
+        let pageCount = b.pageCount || "0"; // TODO fix later. what happens if page count isn't available?
+
+
+        // Loop through each word searched in the query. If any of the words are in the title, then display this book
+        // This is needed because Google Books API searches the subtitles too
         
-        for (let word of clean_query) {
-            console.log("word: ", word);
+        for (let word of clean_query) {      
             if (!clean_title.includes(word)) {
-                titleQueryCheck = false;
-                console.log("check: ", titleQueryCheck);
-                console.log("word: ", word);
-                console.log("title: ", title);
+                titleQueryCheck = false;          
                 break;
             }
         }
@@ -88,6 +87,7 @@ Search
                         <input type="hidden" name="title" value="${title}">
                         <input type = "hidden" name="authors" value="${authors}">
                         <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
+                        <input type="hidden" name="pageCount" value="${b.pageCount || 0}">
                         <button class="btn btn-primary" id = "find-forum">Find Forum</button>
                     </form>
                 </div>
