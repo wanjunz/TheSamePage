@@ -66,8 +66,7 @@ Search
         let clean_title = clean(title);
         let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
         let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
-        let pageCount = b.pageCount || "0"; // TODO fix later. what happens if page count isn't available?
-
+        let pageCount = b.pageCount || 0; // TODO fix later. what happens if page count isn't available?
 
         // Loop through each word searched in the query. If any of the words are in the title, then display this book
         // This is needed because Google Books API searches the subtitles too
@@ -85,9 +84,9 @@ Search
                 <div>
                     <form action="/forum" method="post">
                         <input type="hidden" name="title" value="${title}">
-                        <input type = "hidden" name="authors" value="${authors}">
+                        <input type="hidden" name="authors" value="${authors}">
                         <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
-                        <input type="hidden" name="pageCount" value="${b.pageCount || 0}">
+                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
                         <button class="btn btn-primary" id = "find-forum">Find Forum</button>
                     </form>
                 </div>

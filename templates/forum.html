@@ -13,7 +13,7 @@
     <!-- submit comment for overall forum -->
     <form action = "/comment" method ="post">
         <div class = "mb-3">
-            <textarea name = "message" placeholder = "type comment here"></textarea>
+            <textarea name = "comment" placeholder = "type comment here"></textarea>
         </div>
         <div class = "mb-3">
             <input name = "page" placeholder = "page on (if applicable)" type = "number" min="0" oninput="validity.valid||(value='');">
@@ -21,25 +21,27 @@
             <input name = "pageCount" type = "hidden" value = '{{pageCount}}'> 
         </div>
         <div class = "mb-3">
-            <button type = button>Upload Comment</button>
+            <button type = submit>Upload Comment</button>
         </div>
     </form>
     <!-- display existing comments -->
     {% for comment in comments %}
-        {{comment[0]}} {{comment[3]}}({{comment[5]}})
-        {{comment[1]}}
+        <b>{{comment[0]}}</b> Percent read: {{comment[5]}}% <i>{{comment[3]}}</i>
+        
+        <p>{{comment[1]}}</p>
 
         <!-- reply to specific comment -->
         <form action = "/comment" method ="post">
             <div class = "mb-3">
-                <textarea name = "message" placeholder = 'reply to {{comment[0]}} '></textarea>
+                <!-- TODO might need to change the name of this textarea so it doesn't clash with above comment-->
+                <textarea name = "comment" placeholder = 'reply to {{comment[0]}} '></textarea>
             </div>
             <div class = "mb-3">
                 <input name = "parent_id" type = "hidden" value = '{{comment[2]}}'> 
                 <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
             </div>
             <div class = "mb-3">
-                <button type = button>Reply</button>
+                <button type = submit>Reply</button>
             </div>
         </form>
     {% endfor %}

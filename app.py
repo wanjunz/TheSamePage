@@ -76,13 +76,13 @@ def apisearch():
                     "title": info.get("title", "No title"),
                     "authors": info.get("authors", []),
                     "thumbnail": info.get("imageLinks", {}).get("thumbnail"),
-                    "pages" : info.get("pageCount", 0)
+                    "pageCount": info.get("pageCount", 0)
                 })
             else:
                 books.append({
                     "title": info.get("title", "No title"),
                     "authors": info.get("authors", []),
-                    "pageCount" : info.get("pageCount", 0)
+                    "pageCount": info.get("pageCount", 0)
                 })
     return jsonify(books)
 
@@ -182,9 +182,9 @@ def comment():
             if len(forumIDArray)!=1:
                 return redirect("/")
             comment = request.form.get("comment")
-            user_id = session.get('id')
+            user_id = session["user_id"]
             username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
-            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            time = datetime.now().strftime("%m/%d/%Y, %H:%M")
             
             page = request.form.get("page")
             pageCount = request.form.get("pageCount")
@@ -192,8 +192,10 @@ def comment():
             if not page:
                 executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)
             else:
+                print("page", page)
+                print("pageCount", pageCount)
                 page = float(page)
                 pageCount = float(pageCount)
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, round(page/pageCount)), True)  
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, round(page * 100/pageCount)), True)  
                 # return corresponding forum.html 
                 # return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)
