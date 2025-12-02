@@ -1,9 +1,39 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Search
+    Contributions
 {% endblock %}
 
 {% block main %}
     <h1>Contributions</h1>
+    <!-- display user's past comments -->
+    <!-- comments_info structure is a list of these dicts {"username", "comment", "date", "percent","title", "author"}
+-->
+    {% for comment in comments_info %}
+    <div class = comment-box>
+        <div class = comment-header>
+            <div class="comment-username">
+                {{comment['username']}}
+            </div>
+            <div class="comment-right">
+                <span class="comment-percent">Percent read: {{comment['percent']}}%</span>
+                <span class="comment-date">{{comment['date']}}</span>
+            </div>
+        </div>
+        <div class = "comment-book">
+            <div>
+                <b>Book Title:</b> {{comment['title']}}
+            </div>
+            <div>
+                <b>Author(s):</b> {{comment['author']}}
+            </div>  
+            
+        </div>
+        
+        <div class = "comment-text">
+            {{comment['comment']}}
+        </div>
+    </div>
+
+    {% endfor %}
 {% endblock %}

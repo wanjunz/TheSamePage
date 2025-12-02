@@ -44,7 +44,7 @@ nav.navbar {
 
 /* Hover state */
 .navbar-nav .nav-link:hover { 
-    color: var(--dark-teal); /* TODO need to change this so it doesnt blend into background */
+    color: var(--medium-teal);
     border-radius: 6px;
 }
 
@@ -92,8 +92,89 @@ body {
     border-color: var(--dark-teal);
 }
 
-/* styling for comment boxes */
+/* styling for comments */
 
+/* comment box in forum.html */
 textarea{
     width: 80vw;
+}
+
+/* h4 is used to display username for each comment */
+h4 {
+    color: #333;
+    text-align: left;
+}
+
+/* h5 is used to display the percent read & timestamp for each comment */
+h5 {
+    color: #666;
+    text-align: right;
+    font-size: 10px;
+}
+
+/* style for search box */
+.search-container {
+    display: flex;
+    align-items: center; 
+    padding: 5px;
+}
+
+.search-container input {
+    padding: 5px;
+    flex-grow: 1;
+    margin-top: 12px;
+}
+
+.search-icon {
+    margin-right: 8px; /* Space between input and icon */
+    color: #555;
+    cursor: pointer;
+    float: left;
+}
+
+/* style for comments */
+
+.comment-box {
+    background: var(--light-teal);
+    padding: 25px;
+    border-radius: 25px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin: 40px auto;      /* centers the box */
+    max-width: 700px;   
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.comment-right {
+    text-align: right;
+    white-space: nowrap; /* keeps percent + date on same line */
+    font-weight: 400;
+    color: #444;
+}
+
+.comment-percent,
+.comment-date {
+    display: inline-block;
+    margin-left: 12px; /* spacing between them */
+}
+
+.comment-text {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 8px; 
+}
+.comment-username {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.comment-book {
+    text-align: left;
 }

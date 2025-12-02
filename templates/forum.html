@@ -16,33 +16,65 @@
             <textarea name = "comment" placeholder = "type comment here"></textarea>
         </div>
         <div class = "mb-3">
+            <!-- Values needed to display comment-->
             <input name = "page" placeholder = "page on (if applicable)" type = "number" min="0" oninput="validity.valid||(value='');">
             <input name = "forum_id" type = "hidden" value = '{{forumID}}'> 
-            <input name = "pageCount" type = "hidden" value = '{{pageCount}}'> 
+            <input name = "pageCount" type = "hidden" value = '{{pageCount}}'>
+            
+            <!-- Values needed to reload forum.html-->
+            <input name = "title" type = "hidden" value = '{{title}}'> 
+            <input name = "authors" type = "hidden" value = '{{authors}}'> 
+            <input name = "thumbnail" type = "hidden" value = '{{thumbnail}}'> 
         </div>
         <div class = "mb-3">
             <button type = submit>Upload Comment</button>
         </div>
     </form>
     <!-- display existing comments -->
+    <!-- structure for comments is a list of these lists comment[username, text, parent_id, date, forum_id, percent]-->
     {% for comment in comments %}
-        <b>{{comment[0]}}</b> Percent read: {{comment[5]}}% <i>{{comment[3]}}</i>
-        
-        <p>{{comment[1]}}</p>
+        <div class = comment-box>
+            <div class = comment-header>
+                <div class="comment-username">
+                    {{comment[0]}}
+                </div>
+                <div class="comment-right">
+                    <span class="comment-percent">Percent read: {{comment[5]}}%</span>
+                    <span class="comment-date">{{comment[3]}}</span>
+                </div>
+            </div>
+            
+            <div class = "comment-text">
+                {{comment[1]}}
+            </div>
+            <!-- TODO make the reply function collapsable -->
+            <!-- Reply to a specific comment-->
+            <p>
+                
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                  Reply
+                </button>
+            </p>
+                <div class="collapse" id="collapseExample">
+                    <div class="card card-body">
+                        <!-- reply to specific comment -->
+                        <form action = "/comment" method ="post">
+                            <div class = "mb-3">
+                                <!-- TODO might need to change the name of this textarea so it doesn't clash with above comment-->
+                                <textarea name = "comment" placeholder = 'reply to {{comment[0]}} '></textarea>
+                            </div>
+                            <div class = "mb-3">
+                                <input name = "parent_id" type = "hidden" value = '{{comment[2]}}'> 
+                                <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
+                            </div>
+                            <div class = "mb-3">
+                                <button type = submit>Reply</button>
+                            </div>
+                        </form>
+                    </div>
+              </div>
+        </div>
 
-        <!-- reply to specific comment -->
-        <form action = "/comment" method ="post">
-            <div class = "mb-3">
-                <!-- TODO might need to change the name of this textarea so it doesn't clash with above comment-->
-                <textarea name = "comment" placeholder = 'reply to {{comment[0]}} '></textarea>
-            </div>
-            <div class = "mb-3">
-                <input name = "parent_id" type = "hidden" value = '{{comment[2]}}'> 
-                <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
-            </div>
-            <div class = "mb-3">
-                <button type = submit>Reply</button>
-            </div>
-        </form>
+        
     {% endfor %}
 {% endblock %}
