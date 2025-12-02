@@ -42,10 +42,29 @@ def after_request(response):
 def home():
     return render_template('index.html')
 
-@app.route('/contributions', methods=['POST'])
+@app.route('/contributions', methods=['GET'])
 def contributions():
+    user_id = session["user_id"]
+    username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
+    # TODO is it dangerous that we are calling their comments via their username rather than user_id? also, can they change the username in insepct to see other users' comments?
+    user_comments = executeSQL("SELECT * FROM forums WHERE username = ?", (username,), False)
     
-    return render_template("contributions.html")
+    # combine user's comments and the book info associated into comments_info
+    comments_info = []
+    for comment in user_comments:
+        book_id = comment[4]
+        book_info = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (book_id,), False)
+        # book_row is a list like: [('Title', 'Author')]
+        if book_info:
+            title = book_info[0][0]
+            author = book_info[0][1]
+        else:
+            title = None
+            author = None
+
+        comments_info.append({"username":comment[0], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author})
+    print(comments_info)
+    return render_template("contributions.html", comments_info = comments_info)
 
 @app.route('/search', methods=['POST', 'GET'])
 def search():
@@ -71,6 +90,7 @@ def apisearch():
     if "items" in data:
         for item in data["items"][:10]:  # limit results to 10
             info = item.get("volumeInfo", {})
+            # check if book cover exists, then add relevant info into books list
             if 'volumeInfo' in item and 'imageLinks' in item['volumeInfo']:
                 books.append({
                     "title": info.get("title", "No title"),
@@ -78,6 +98,7 @@ def apisearch():
                     "thumbnail": info.get("imageLinks", {}).get("thumbnail"),
                     "pageCount": info.get("pageCount", 0)
                 })
+            # if no cover, don't add thumbnail key
             else:
                 books.append({
                     "title": info.get("title", "No title"),
@@ -86,8 +107,10 @@ def apisearch():
                 })
     return jsonify(books)
 
-@app.route('/forum', methods=['POST'])
+@app.route('/forum', methods=['POST', 'GET'])
 def forum():
+    if request.method == 'GET':
+        return render_template("forum.html")
     title = request.form.get("title")   # book title passed from search.html
     authors = request.form.get("authors") # book authors passed from search.html
     thumbnail = request.form.get("thumbnail") # book thumbnail passed from search.html
@@ -181,21 +204,33 @@ def comment():
             # if invalid forum_id, return home
             if len(forumIDArray)!=1:
                 return redirect("/")
-            comment = request.form.get("comment")
+            
             user_id = session["user_id"]
             username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
             time = datetime.now().strftime("%m/%d/%Y, %H:%M")
-            
+
+            # retrieve info from 'upload comment' button in forum.html
+            comment = request.form.get("comment")
+            title = request.form.get("title")
+            authors = request.form.get("authors")
+            thumbnail = request.form.get("thumbnail")
             page = request.form.get("page")
             pageCount = request.form.get("pageCount")
+
             # general comment, no page inputted
             if not page:
                 executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)
+                comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
+                # return corresponding forum.html 
+                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
+            # comment with page progress inputted
             else:
-                print("page", page)
-                print("pageCount", pageCount)
+                # caclulate percent read
                 page = float(page)
                 pageCount = float(pageCount)
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, round(page * 100/pageCount)), True)  
+                percent = round(page * 100/pageCount)
+                
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
+                comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
                 # return corresponding forum.html 
-                # return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments)
+                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
