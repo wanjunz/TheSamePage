@@ -101,7 +101,7 @@ textarea{
 
 .author{
     font-weight: bold;
-    color: var(--dark);
+    color: #555;
 
 }
 
@@ -196,5 +196,5 @@ h5 {
 }
 
 textarea{
-    max-width: 200px;
+    max-width: 600px;
 }

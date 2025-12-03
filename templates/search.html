@@ -90,7 +90,16 @@ Search
                         <input type="hidden" name="authors" value="${authors}">
                         <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
                         <input type="hidden" name="pageCount" value="${pageCount || 0}">
-                        <button class="btn btn-primary" id = "find-forum">Find Forum</button>
+                        <button class="btn btn-primary" id = "find-forum">Access Forum</button>
+                    </form>
+                </div>
+                <div>
+                    <form action="/add" method="post">
+                        <input type="hidden" name="title" value="${title}">
+                        <input type="hidden" name="authors" value="${authors}">
+                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
+                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
+                        <button class="btn btn-primary" id = "find-forum">Add Book</button>
                     </form>
                 </div>
                 ${img}

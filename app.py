@@ -135,10 +135,12 @@ def forum():
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
     # if not in table then add it
-    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
     if len(row)!=1:
         executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+    else:
+        row=row[0]
     # get comments for specific book
     comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
@@ -235,7 +237,7 @@ def comment():
             # general comment, no page inputted
             if not page:
                 percent = 'N/A'
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?, ?)", (username, comment, time, forum_id, percent), True)
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percentage) VALUES (?,?,?,?, ?)", (username, comment, time, forum_id, percent), True)
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
                 
                 # return corresponding forum.html 
@@ -243,6 +245,8 @@ def comment():
             # comment with page progress inputted
             else:
                 # caclulate percent read
+                print("page:", page)
+                print("count:", pageCount)
                 page = float(page)
                 pageCount = float(pageCount)
 
