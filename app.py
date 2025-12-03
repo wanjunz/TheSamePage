@@ -135,11 +135,10 @@ def forum():
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
     # if not in table then add it
-    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
+    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
     if len(row)!=1:
         executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
-    
     # get comments for specific book
     comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
