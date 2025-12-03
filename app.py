@@ -247,6 +247,7 @@ def comment():
                 pageCount = float(pageCount)
 
                 percent = str(round(page * 100/pageCount))
+
                 executeSQL("INSERT INTO forums(username, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
 
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
