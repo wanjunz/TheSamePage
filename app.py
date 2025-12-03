@@ -140,6 +140,7 @@ def forum():
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
     else:
         row = row[0]
+
     # get comments for specific book
     comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
@@ -244,6 +245,8 @@ def comment():
             # comment with page progress inputted
             else:
                 # caclulate percent read
+                print("page:", page)
+                print("count:", pageCount)
                 page = float(page)
                 pageCount = float(pageCount)
 

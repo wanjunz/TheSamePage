@@ -17,7 +17,9 @@
         </div>
         <div class = "mb-3">
             <!-- Values needed to display comment-->
-            <input name = "page" placeholder = "page on (if applicable)" type = "number" min="0" oninput="validity.valid||(value='');">
+            Currently reading page
+            <input name = "page" type = "number" min="0" max = {{pageCount}} oninput="validity.valid||(value='');">
+            out of {{pageCount}} total pages (if applicable)
             <input name = "forum_id" type = "hidden" value = '{{forumID}}'> 
             <input name = "pageCount" type = "hidden" value = '{{pageCount}}'>
             
