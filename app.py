@@ -235,18 +235,21 @@ def comment():
 
             # general comment, no page inputted
             if not page:
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id) VALUES (?,?,?,?)", (username, comment, time, forum_id), True)
+                percent = 'N/A'
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?, ?)", (username, comment, time, forum_id, percent), True)
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
+                
                 # return corresponding forum.html 
-                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
+                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments, perecnt=percent)
             # comment with page progress inputted
             else:
                 # caclulate percent read
                 page = float(page)
                 pageCount = float(pageCount)
-                percent = round(page * 100/pageCount)
-                
+                percent = str(round(page * 100/pageCount))
+
                 executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
+                
                 # return corresponding forum.html 
                 return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
