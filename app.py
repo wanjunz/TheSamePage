@@ -39,8 +39,24 @@ def after_request(response):
 
 
 @app.route('/')
-def home():
-    return render_template('index.html')
+def default():
+    if session.get("user_id") is None:
+        return render_template('login.html')
+    # get username and lists for names of books user is reading / has read
+    username = executeSQL("SELECT username FROM users WHERE id = ?", (session["user_id"],), False)[0][0]
+    booksinProg = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'PROG' AND user_id = ?", (session["user_id"],),False)
+    booksRead = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'READ' AND user_id = ?", (session["user_id"],),False)
+    # create list of pairs of book information and corresponding comments for each list
+    progComments = []
+    readComments = []
+    #for book in booksinProg:
+    #    progComments.append((book, executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)))
+    #for book in booksRead:
+    #    readComments.append((book, executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)))
+    
+    #return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
+
+    return render_template('home.html', username = username)
 
 @app.route('/contributions', methods=['GET'])
 def contributions():
@@ -119,14 +135,14 @@ def forum():
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
     # if not in table then add it
-    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ?", (title, authors), False)
+    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
     if len(row)!=1:
-        executeSQL("INSERT INTO chapters (title, author) VALUES (?, ?)", (title, authors), True)
-        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ?", (title, authors), False)
-    forumID = row[0][2]
+        executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
+        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+    
     # get comments for specific book
-    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forumID,), False)
-    return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forumID, comments = comments, pageCount = pageCount)
+    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
