@@ -78,7 +78,7 @@ def contributions():
             title = None
             author = None
 
-        comments_info.append({"username":comment[0], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author})
+        comments_info.append({"username":comment[0], "comment":comment[1], "date":comment[3], "percentage":comment[5] ,"title":title, "author":author})
     print(comments_info)
     return render_template("contributions.html", comments_info = comments_info)
 
@@ -245,7 +245,7 @@ def comment():
                 pageCount = float(pageCount)
                 percent = round(page * 100/pageCount)
                 
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percent) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
+                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
                 # return corresponding forum.html 
                 return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
