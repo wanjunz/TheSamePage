@@ -6,7 +6,7 @@
 
 {% block main %}
     <h1>Forum for {{ title }}</h1>
-    <h5>Author(s): {{ authors }}</h5>
+    <h2 id = author>Author(s): {{ authors }}</h2>
     <div class = "mb-3">
         <img src="{{thumbnail}} " width="100" alt="Book Cover">
     </div>
@@ -51,7 +51,7 @@
             <!-- Reply to a specific comment-->
             <p>
                 
-                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                <button class="reply-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                   Reply
                 </button>
             </p>
@@ -68,7 +68,7 @@
                                 <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
                             </div>
                             <div class = "mb-3">
-                                <button type = submit>Reply</button>
+                                <button type = submit>Upload Reply</button>
                             </div>
                         </form>
                     </div>

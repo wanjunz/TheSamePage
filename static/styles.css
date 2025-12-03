@@ -99,6 +99,12 @@ textarea{
     width: 80vw;
 }
 
+.author{
+    font-weight: bold;
+    color: var(--dark);
+
+}
+
 /* h4 is used to display username for each comment */
 h4 {
     color: #333;
@@ -177,4 +183,18 @@ h5 {
 
 .comment-book {
     text-align: left;
+}
+
+.reply-button {
+    background-color: var(--dark-teal);
+    color: var(--light-cream);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+textarea{
+    max-width: 200px;
 }
