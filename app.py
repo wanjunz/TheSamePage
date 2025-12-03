@@ -245,8 +245,6 @@ def comment():
             # comment with page progress inputted
             else:
                 # caclulate percent read
-                print("page:", page)
-                print("count:", pageCount)
                 page = float(page)
                 pageCount = float(pageCount)
 
