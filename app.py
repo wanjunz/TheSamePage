@@ -43,6 +43,7 @@ def after_request(response):
 
 @app.route('/')
 def default():
+    # home page is login page if not logged in
     if session.get("user_id") is None:
         return render_template('login.html')
     # get username and lists for names of books TBR/in progress/done
@@ -118,25 +119,25 @@ def markAsDone():
 def contributions():
     user_id = session["user_id"]
     username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
-    # TODO is it dangerous that we are calling their comments via their username rather than user_id? also, can they change the username in insepct to see other users' comments?
     user_comments = executeSQL("SELECT * FROM forums WHERE user_id = ? ORDER BY time DESC", (session["user_id"],), False)
-
-    print("user_comments: ", user_comments)
-    
+ 
     # combine user's comments and the book info associated into comments_info
     comments_info = []
     for comment in user_comments:
         book_id = comment[4]
         book_info = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (book_id,), False)
-        # book_row is a list like: [('Title', 'Author')]
+        # book_info is a list like: [('Title', 'Author')]
         if book_info:
             title = book_info[0][0]
             author = book_info[0][1]
         else:
             title = None
             author = None
-
-        comments_info.append({"username":username, "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author})
+        if comment[2] is not None:
+            parentComment = executeSQL("SELECT comment FROM forums WHERE comment_id = ?", (comment[2],), False)[0][0]
+        else:
+            parentComment = None
+        comments_info.append({"username":username, "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author, "parentComment": parentComment})
     return render_template("contributions.html", comments_info = comments_info)
 
 @app.route('/search', methods=['POST', 'GET'])

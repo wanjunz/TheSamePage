@@ -37,10 +37,14 @@
             </div>  
             
         </div>
-        
         <div class = "comment-text">
             {{comment['comment']}}
         </div>
+        {% if comment['parentComment'] is not none %}
+        <div class = "comment-reply">
+            (Reply to: {{comment['parentComment']}})
+        </div>
+        {% endif %}
     </div>
 
     {% endfor %}
