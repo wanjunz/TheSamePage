@@ -286,60 +286,48 @@ def comment():
     # adds user comment to database and then shows page with it on
     if request.method == "POST":
         parent_id = request.form.get("parent_id")
-        # not a reply to a comment
         forum_id = request.form.get("forum_id")
 
+        # retrieve info from 'upload comment' button in forum.html
+        comment = request.form.get("comment")
+
+        # if blank comment or forum_id, return home
+        if not comment or not forum_id: 
+            return redirect("/")
+
+        # if forum info tampered with, return home
+        forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ? ", (forum_id,),False)
+        if len(forumIDArray)!=1:
+            return redirect("/")
+        forumIDArray=forumIDArray[0]
+            
+        time = datetime.now().strftime("%m/%d/%Y, %H:%M")
         # parent_id refers to the parent reply. If empty, then it's a regular comment, not a reply to a comment
         if not parent_id:
-            title = request.form.get("title")
-            authors = request.form.get("authors")
-            thumbnail = request.form.get("thumbnail")
             page = request.form.get("page")
-            pageCount = request.form.get("pageCount")
 
-            forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ? AND title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (forum_id, title, authors, thumbnail, pageCount),False)
-            # if hidden info tampered with, return home
-            if len(forumIDArray)!=1:
-                return redirect("/")
-            
-            user_id = session["user_id"]
-            username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
-            time = datetime.now().strftime("%m/%d/%Y, %H:%M")
-
-            # retrieve info from 'upload comment' button in forum.html
-            comment = request.form.get("comment")
-            # if blank comment, return home
-            if not comment: 
-                return redirect("/")
-            
             # general comment, no page inputted
             if not page:
                 percent = 'N/A'
-                executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?, ?)", (session["user_id"], comment, time, forum_id, percent), True)
-                comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (forum_id,), False)
-    
-                # return corresponding forum.html 
-                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments, percent=percent)
+
             # comment with page progress inputted
             else:
                 # caclulate percent read
                 page = float(page)
-                pageCount = float(pageCount)
-
+                pageCount = float(forumIDArray[4])
                 percent = str(round(page * 100/pageCount))
 
-                executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (session["user_id"], comment, time, forum_id, percent), True)   
+            executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (session["user_id"], comment, time, forum_id, percent), True)   
 
-                comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
-                
-                # return corresponding forum.html 
-                return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
         # reply to a comment
         else: 
-            comment = request.form.get("comment")
-            parent_id = request.form.get("parent_id")
-            forum_id = request.form.get("forum_id")
-            
+            # hidden data tampered with
+            parentComment = executeSQL("SELECT * FROM forums WHERE comment_id = ? AND forum_id = ?", (parent_id, forum_id), False)
+            if len(parentComment)!=1:
+                return redirect("/")
+            parentComment=parentComment[0]
+            executeSQL("INSERT INTO forums(user_id, comment, parent_id, time, forum_id, percentage) VALUES(?, ?, ?, ?, ?, ?)", (session["user_id"], comment, parent_id, time, forum_id, parentComment[5]),True)
+        return openForum()
 # Delete comments
 @app.route("/delete", methods = ["POST"])
 def delete():

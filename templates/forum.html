@@ -21,12 +21,6 @@
             <input name = "page" type = "number" min="0" max = {{pageCount}} oninput="validity.valid||(value='');">
             out of {{pageCount}} total pages (if applicable)
             <input name = "forum_id" type = "hidden" value = '{{forumID}}'> 
-            <input name = "pageCount" type = "hidden" value = '{{pageCount}}'>
-            
-            <!-- Values needed to reload forum.html-->
-            <input name = "title" type = "hidden" value = '{{title}}'> 
-            <input name = "authors" type = "hidden" value = '{{authors}}'> 
-            <input name = "thumbnail" type = "hidden" value = '{{thumbnail}}'> 
         </div>
         <div class = "mb-3">
             <button type = submit>Upload Comment</button>
@@ -62,11 +56,10 @@
                         <!-- reply to specific comment -->
                         <form action = "/comment" method ="post">
                             <div class = "mb-3">
-                                <!-- TODO might need to change the name of this textarea so it doesn't clash with above comment-->
                                 <textarea name = "comment" placeholder = 'reply to {{comment[0]}} '></textarea>
                             </div>
                             <div class = "mb-3">
-                                <input name = "parent_id" type = "hidden" value = '{{comment[2]}}'> 
+                                <input name = "parent_id" type = "hidden" value = '{{comment[6]}}'> 
                                 <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
                             </div>
                             <div class = "mb-3">

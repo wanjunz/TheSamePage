@@ -245,5 +245,7 @@ table{
 
 table td{
     vertical-align: top;
-  }
+    word-wrap: break-word;
+    max-width: 200px;
+}
   
