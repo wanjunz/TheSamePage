@@ -225,7 +225,14 @@ def openForum():
         row = row[0]
     # get comments for specific book
     comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
+    commentReplyPairs = []
+    for comment in comments:
+        if comment[2] is not None:
+            parentComment = executeSQL("SELECT comment FROM forums WHERE comment_id = ?", (comment[2],), False)[0][0]
+        else:
+            parentComment = None
+        commentReplyPairs.append((comment, parentComment))
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = commentReplyPairs, pageCount = row[4])
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -312,6 +319,7 @@ def comment():
         time = datetime.now().strftime("%m/%d/%Y, %H:%M")
         # parent_id refers to the parent reply. If empty, then it's a regular comment, not a reply to a comment
         if not parent_id:
+            print("not a reply")
             page = request.form.get("page")
 
             # general comment, no page inputted
