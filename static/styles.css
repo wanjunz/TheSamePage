@@ -198,3 +198,25 @@ h5 {
 textarea{
     max-width: 600px;
 }
+
+/* style for home page */
+
+/* general scroll bars */
+.scroll-container {
+    display: flex;
+    flex-wrap: nowrap; /* Keeps items on a single line */
+    overflow-x: auto; /* Adds a horizontal scrollbar if content overflows */
+    width: 100%; 
+    padding-bottom: 0px;
+}
+
+/* contents in scroll bars*/
+.list-item {
+    flex: 0 0 auto; /* Prevents items from shrinking or growing */
+    width: 200px;
+    height: 300px;
+    margin-right: 20px;
+    text-align: center;
+}
+
+/*text on home page*/

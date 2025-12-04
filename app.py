@@ -29,6 +29,10 @@ def executeSQL(command, args, needCommit):
     connection.close()
     return val
 
+# checks if book with given information exists in google books API
+def inAPI(title, authors, thumbnail, pageCount):
+    return True
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -37,28 +41,18 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-
 @app.route('/')
 def default():
     if session.get("user_id") is None:
         return render_template('login.html')
-    # get username and lists for names of books user is reading / has read
+    # get username and lists for names of books TBR/in progress/done
     username = executeSQL("SELECT username FROM users WHERE id = ?", (session["user_id"],), False)[0][0]
-    booksinProg = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'PROG' AND user_id = ?", (session["user_id"],),False)
-    booksRead = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'READ' AND user_id = ?", (session["user_id"],),False)
-    # create list of pairs of book information and corresponding comments for each list
-    progPairs = []
-    readComments = []
-    for book in booksinProg:
-        comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)
-        progPairs.append([book, comments])
-    print(progPairs)
-    #for book in booksRead:
-    #    readComments.append((book, executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)))
-    
-    #return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
-    return render_template('home.html', username = username, booksinProg = progPairs)
+    booksTBR = executeSQL("SELECT title, author, chapters.forum_id, thumbnail FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'TBR' AND user_id = ?", (session["user_id"],),False)
+    booksinProg = executeSQL("SELECT title, author, chapters.forum_id, thumbnail FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'PROG' AND user_id = ?", (session["user_id"],),False)
+    booksDone = executeSQL("SELECT title, author, chapters.forum_id, thumbnail FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'DONE' AND user_id = ?", (session["user_id"],),False)
+    return render_template('home.html', username = username, booksinProg = booksinProg, booksDone = booksDone, booksTBR = booksTBR)
 
+# add book into user's TBR in home page from search page
 @app.route('/add', methods=['POST'])
 def addBook():
     title = request.form.get("title")   # book title passed from search.html
@@ -73,12 +67,11 @@ def addBook():
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
     else:
         row = row[0]
-    forum_id = row[2]
 
     # if not already in homeBooks, insert book into homeBooks as one of currently readings
     inHomeBooks = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (row[2], session["user_id"]), False)
     if len(inHomeBooks)!=1:
-        executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (row[2], session["user_id"], "PROG"), True)
+        executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (row[2], session["user_id"], "TBR"), True)
     return redirect("/")
 
 @app.route('/contributions', methods=['GET'])
@@ -166,6 +159,23 @@ def forum():
 
     # get comments for specific book
     comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
+
+# opens forum from home page buttons
+@app.route('/openForum', methods = ['POST'])
+def openForum():
+    forum_id = request.form.get("forum_id")
+    # forum_id blank
+    if not forum_id:
+        return redirect("/")
+    # check forum_id exists in table
+    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (forum_id,), False)
+    if len(row)!=1:
+        return redirect("/")
+    else:
+        row = row[0]
+    # get comments for specific book
+    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
 
 @app.route('/login', methods=['POST', 'GET'])

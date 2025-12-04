@@ -6,20 +6,75 @@
 
 {% block main %}
     <h1>Hello, {{username}}!</h1>
-    <div><strong>Here are some books you're currently reading: </strong></div>
-    
-    {% for book in booksinProg %}
-    
-    <div><img src = {{book[0][3]}}></div>
-    <div>{{book[0][0]}}</div>
-    <div>By {{book[0][1]}}</div>
-    <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
-        <form action = "/openForum" method = "POST">
-            <button class="btn btn-primary">Get Forum</button>
-        </form>
-        <form action = "/finishBook" method = "POST">
-            <button class="btn btn-primary">Mark as Read</button>
-        </form>
-    </li>  
+
+    <div><h4>Here are some books in your TBR list: </h4></div>
+    <div class = "scroll-container">
+    {% for book in booksTBR %}
+    <div class = "list-item">
+        <div><img src = {{book[3]}} height="100"></div>
+        <div>{{book[0]}}</div>
+        <div>By {{book[1]}}</div>
+        <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
+            <form action = "/openForum" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Get Forum</button>
+            </form>
+            <form action = "/readBook" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Mark as Reading</button>
+            </form>
+            <form action = "/deleteBook" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Remove</button>
+            </form>
+        </li>  
+    </div>
     {% endfor %}
+    </div>
+
+    <div><h4>Here are some books you're currently reading: </h4></div>
+    <div class = "scroll-container">
+    {% for book in booksinProg %}
+    <div class = "list-item">
+        <div><img src = {{book[3]}} height="100"></div>
+        <div>{{book[0]}}</div>
+        <div>By {{book[1]}}</div>
+        <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
+            <form action = "/openForum" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Get Forum</button>
+            </form>
+            <form action = "/finishBook" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Mark as Read</button>
+            </form>
+            <form action = "/deleteBook" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Remove</button>
+            </form>
+        </li>  
+    </div>
+    {% endfor %}
+    </div>
+
+    <div><h4>Here are some books you've finished reading: </h4></div>
+    <div class = "scroll-container">
+    {% for book in booksDone %}
+    <div class = "list-item">
+        <div><img src = {{book[3]}} height="100"></div>
+        <div>{{book[0]}}</div>
+        <div>By {{book[1]}}</div>
+        <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
+            <form action = "/openForum" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'> 
+                <button class="btn btn-primary">Get Forum</button>
+            </form>
+            <form action = "/deleteBook" method = "POST">
+                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                <button class="btn btn-primary">Remove</button>
+            </form>
+        </li>  
+    </div>
+    {% endfor %}
+    </div>
 {% endblock %}
