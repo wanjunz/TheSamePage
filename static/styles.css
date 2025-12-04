@@ -101,8 +101,7 @@ textarea{
 
 .author{
     font-weight: bold;
-    color: #555;
-
+    color: var(--light-teal);
 }
 
 /* h4 is used to display username for each comment */
@@ -171,7 +170,7 @@ h5 {
 }
 
 .comment-text {
-    text-align: center;
+    text-align: left;
     font-size: 1.1rem;
     margin-top: 8px; 
 }

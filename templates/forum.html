@@ -5,14 +5,14 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Forum for {{ title }}</h1>
-    <h2 id = author>Author(s): {{ authors }}</h2>
+    <h1>Forum for <i>{{ title }}</i></h1>
+    <p>Author(s): {{ authors }}</p>
     <div class = "mb-3">
         <img src="{{thumbnail}} " width="100" alt="Book Cover">
     </div>
     <!-- submit comment for overall forum -->
     <form action = "/comment" method ="post">
-        <div class = "mb-3">
+        <div class = "type-comment">
             <textarea name = "comment" placeholder = "type comment here"></textarea>
         </div>
         <div class = "mb-3">
