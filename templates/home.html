@@ -33,30 +33,46 @@
     </div>
 
     <div><h4>Here are some books you're currently reading: </h4></div>
-    <div class = "scroll-container">
-    {% for book in booksinProg %}
-    <div class = "list-item">
-        <div><img src = {{book[3]}} height="100"></div>
-        <div>{{book[0]}}</div>
-        <div>By {{book[1]}}</div>
-        <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
-            <form action = "/openForum" method = "POST">
-                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
-                <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
-            </form>
-            <form action = "/finishBook" method = "POST">
-                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
-                <input type="image" src="../static/done-reading.png" title="Mark as Done" alt="Mark as Done" width="48" height="48">
-            </form>
-            <form action = "/deleteBook" method = "POST">
-                <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
-                <input type="image" src="../static/remove-book.png" title="Remove Book" alt="Remove Book" width="48" height="48">
-            </form>
-        </li>  
+    <div class = "table-wrapper">
+        <table>
+            <tr>
+                {% for book in booksinProg %}
+                    <td><img src = {{book[3]}} height="100"></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for book in booksinProg %}
+                    <td>{{book[0]}}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for book in booksinProg %}
+                    <td>{{book[1]}}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for book in booksinProg %}
+                <td>
+                <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
+                    <form action = "/openForum" method = "POST">
+                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                        <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
+                    </form>
+                    <form action = "/finishBook" method = "POST">
+                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                        <input type="image" src="../static/done-reading.png" title="Mark as Done" alt="Mark as Done" width="48" height="48">
+                    </form>
+                    <form action = "/deleteBook" method = "POST">
+                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                        <input type="image" src="../static/remove-book.png" title="Remove Book" alt="Remove Book" width="48" height="48">
+                    </form>
+                </li> 
+            </td>
+                {% endfor %}
+            </tr>
+        </table>
     </div>
-    {% endfor %}
-    </div>
-
+    
     <div><h4>Here are some books you've finished reading: </h4></div>
     <div class = "scroll-container">
     {% for book in booksDone %}
@@ -77,4 +93,5 @@
     </div>
     {% endfor %}
     </div>
+    
 {% endblock %}

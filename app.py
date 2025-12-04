@@ -119,7 +119,7 @@ def contributions():
     user_id = session["user_id"]
     username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
     # TODO is it dangerous that we are calling their comments via their username rather than user_id? also, can they change the username in insepct to see other users' comments?
-    user_comments = executeSQL("SELECT * FROM forums WHERE username = ? ORDER BY time DESC", (username,), False)
+    user_comments = executeSQL("SELECT * FROM forums WHERE user_id = ? ORDER BY time DESC", (session["user_id"],), False)
 
     print("user_comments: ", user_comments)
     
@@ -136,7 +136,7 @@ def contributions():
             title = None
             author = None
 
-        comments_info.append({"username":comment[0], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author})
+        comments_info.append({"username":username, "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author})
     return render_template("contributions.html", comments_info = comments_info)
 
 @app.route('/search', methods=['POST', 'GET'])
@@ -198,9 +198,8 @@ def forum():
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
     else:
         row = row[0]
-
     # get comments for specific book
-    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
+    comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
 
 # opens forum from home page buttons
@@ -217,7 +216,7 @@ def openForum():
     else:
         row = row[0]
     # get comments for specific book
-    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
+    comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -316,7 +315,7 @@ def comment():
             # general comment, no page inputted
             if not page:
                 percent = 'N/A'
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percentage) VALUES (?,?,?,?, ?)", (username, comment, time, forum_id, percent), True)
+                executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?, ?)", (session["user_id"], comment, time, forum_id, percent), True)
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
                 
                 # return corresponding forum.html 
@@ -329,7 +328,7 @@ def comment():
 
                 percent = str(round(page * 100/pageCount))
 
-                executeSQL("INSERT INTO forums(username, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (username, comment, time, forum_id, percent), True)   
+                executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (session["user_id"], comment, time, forum_id, percent), True)   
 
                 comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
                 
@@ -344,14 +343,11 @@ def comment():
 # Delete comments
 @app.route("/delete", methods = ["POST"])
 def delete():
-
-    username = request.form.get("username")
     comment = request.form.get("comment")
     time = request.form.get("date")
-
-    print("username:" , username)
-    print("comment", comment)
-    print("time", time)
-    executeSQL("DELETE FROM forums WHERE username = ? and comment = ? and time = ?", (username, comment, time), True)
+    
+    row = executeSQL("SELECT * FROM forums WHERE user_id = ? and comment = ? and time = ?", (session["user_id"], comment, time), False)
+    if len(row)==1:
+        executeSQL("DELETE FROM forums WHERE user_id = ? and comment = ? and time = ?", (session["user_id"], comment, time), True)
 
     return redirect("/contributions")

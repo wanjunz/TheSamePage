@@ -68,7 +68,7 @@ Search
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
         let clean_title = clean(title);
         let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
-        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "";
+        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : ""; // TODO can we add the no cover found image here 
         let pageCount = b.pageCount || 0; // TODO fix later. what happens if page count isn't available?
 
         // Loop through each word searched in the query. If any of the words are in the title, then display this book
