@@ -27,22 +27,27 @@
         </div>
     </form>
     <!-- display existing comments -->
-    <!-- structure for comments is a list of these lists comment[username, text, parent_id, date, forum_id, percent]-->
+    <!-- structure for comments is a list of these lists comment[0][username, text, parent_id, date, forum_id, percent]-->
     {% for comment in comments %}
         <div class = comment-box>
             <div class = comment-header>
                 <div class="comment-username">
-                    {{comment[0]}}
+                    {{comment[0][0]}}
                 </div>
                 <div class="comment-right">
-                    <span class="comment-percent">Percent read: {{comment[5]}}%</span>
-                    <span class="comment-date">{{comment[3]}}</span>
+                    <span class="comment-percent">Percent read: {{comment[0][5]}}%</span>
+                    <span class="comment-date">{{comment[0][3]}}</span>
                 </div>
             </div>
             
             <div class = "comment-text">
-                {{comment[1]}}
+                {{comment[0][1]}}
             </div>
+            {% if comment[1] is not none %}
+                <div class = "comment-reply">
+                    (Reply to: {{comment[1]}})
+                </div>
+            {% endif %}
             <!-- TODO make the reply function collapsable -->
             <!-- Reply to a specific comment-->
             <p>
@@ -56,11 +61,11 @@
                         <!-- reply to specific comment -->
                         <form action = "/comment" method ="post">
                             <div class = "mb-3">
-                                <textarea name = "comment" placeholder = 'reply to {{comment[0]}} '></textarea>
+                                <textarea name = "comment" placeholder = 'reply to {{comment[0][0]}} '></textarea>
                             </div>
                             <div class = "mb-3">
-                                <input name = "parent_id" type = "hidden" value = '{{comment[6]}}'> 
-                                <input name = "forum_id" type = "hidden" value = '{{comment[4]}}'> 
+                                <input name = "parent_id" type = "hidden" value = '{{comment[0][6]}}'> 
+                                <input name = "forum_id" type = "hidden" value = '{{comment[0][4]}}'> 
                             </div>
                             <div class = "mb-3">
                                 <button type = submit>Upload Reply</button>
