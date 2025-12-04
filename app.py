@@ -316,8 +316,8 @@ def comment():
             if not page:
                 percent = 'N/A'
                 executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?, ?)", (session["user_id"], comment, time, forum_id, percent), True)
-                comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (forum_id,), False)
-                
+                comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (forum_id,), False)
+    
                 # return corresponding forum.html 
                 return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments, percent=percent)
             # comment with page progress inputted
