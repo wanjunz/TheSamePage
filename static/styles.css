@@ -101,8 +101,7 @@ textarea{
 
 .author{
     font-weight: bold;
-    color: #555;
-
+    color: var(--light-teal);
 }
 
 /* h4 is used to display username for each comment */
@@ -171,7 +170,7 @@ h5 {
 }
 
 .comment-text {
-    text-align: center;
+    text-align: left;
     font-size: 1.1rem;
     margin-top: 8px; 
 }
@@ -185,6 +184,18 @@ h5 {
     text-align: left;
 }
 
+.trash-can {
+    background: transparent;
+    border: none;
+}
+
+.reply-card {
+    background-color: transparent;
+    box-shadow: none;   
+    border: none;      
+}
+
+
 .reply-button {
     background-color: var(--dark-teal);
     color: var(--light-cream);
@@ -197,7 +208,9 @@ h5 {
 
 textarea{
     max-width: 600px;
+    border-radius: 10px; /* rounded corners */
 }
+
 
 /* style for home page */
 
@@ -219,4 +232,3 @@ textarea{
     text-align: center;
 }
 
-/*text on home page*/

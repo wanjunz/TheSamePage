@@ -18,6 +18,14 @@
             <div class="comment-right">
                 <span class="comment-percent">Percent read: {{comment['percent']}}%</span>
                 <span class="comment-date">{{comment['date']}}</span>
+                <form action="/delete" method="post">
+                    <input type="hidden" name="username" value="{{comment['username']}}">
+                    <input type="hidden" name="comment" value="{{comment['comment']}}">
+                    <input type="hidden" name="date" value="{{comment['date']}}">
+
+                    <button class = "trash-can"> <i class="fa-solid fa-trash-can"></i> </button>
+                </form>
+                
             </div>
         </div>
         <div class = "comment-book">

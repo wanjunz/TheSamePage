@@ -85,21 +85,21 @@ Search
             <li class="d-flex gap-3 align-items-start mb-3">
                 <!-- POST form sends user to forum.html -->
                 <div>
-                    <form action="/forum" method="post">
-                        <input type="hidden" name="title" value="${title}">
-                        <input type="hidden" name="authors" value="${authors}">
-                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
-                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
-                        <button class="btn btn-primary" id = "find-forum">Access Forum</button>
-                    </form>
-                </div>
-                <div>
                     <form action="/add" method="post">
                         <input type="hidden" name="title" value="${title}">
                         <input type="hidden" name="authors" value="${authors}">
                         <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
                         <input type="hidden" name="pageCount" value="${pageCount || 0}">
-                        <button class="btn btn-primary" id = "add-book">Add Book</button>
+                        <input type="image" src="../static/AddBook.png" alt="Add Book" width="48" height="48">
+                    </form>
+                </div>
+                <div>
+                    <form action="/forum" method="post">
+                        <input type="hidden" name="title" value="${title}">
+                        <input type="hidden" name="authors" value="${authors}">
+                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
+                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
+                        <input type="image" src="../static/AccessForum.png" alt="Access Forum" width="48" height="48">
                     </form>
                 </div>
                 ${img}
