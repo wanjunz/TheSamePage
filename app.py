@@ -47,16 +47,39 @@ def default():
     booksinProg = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'PROG' AND user_id = ?", (session["user_id"],),False)
     booksRead = executeSQL("SELECT title, author, chapters.forum_id, thumbnail, pageCount FROM chapters JOIN homeBooks ON homeBooks.forum_id = chapters.forum_id WHERE homeBooks.status = 'READ' AND user_id = ?", (session["user_id"],),False)
     # create list of pairs of book information and corresponding comments for each list
-    progComments = []
+    progPairs = []
     readComments = []
-    #for book in booksinProg:
-    #    progComments.append((book, executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)))
+    for book in booksinProg:
+        comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)
+        progPairs.append([book, comments])
+    print(progPairs)
     #for book in booksRead:
     #    readComments.append((book, executeSQL("SELECT * FROM forums WHERE forum_id = ?", (book[2],), False)))
     
     #return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
+    return render_template('home.html', username = username, booksinProg = progPairs)
 
-    return render_template('home.html', username = username)
+@app.route('/add', methods=['POST'])
+def addBook():
+    title = request.form.get("title")   # book title passed from search.html
+    authors = request.form.get("authors") # book authors passed from search.html
+    thumbnail = request.form.get("thumbnail") # book thumbnail passed from search.html
+    pageCount = request.form.get("pageCount") # book page count passed from search.html
+    
+    # get corresponding book's forum id
+    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
+    if len(row)!=1:
+        executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
+        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+    else:
+        row = row[0]
+    forum_id = row[2]
+
+    # if not already in homeBooks, insert book into homeBooks as one of currently readings
+    inHomeBooks = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (row[2], session["user_id"]), False)
+    if len(inHomeBooks)!=1:
+        executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (row[2], session["user_id"], "PROG"), True)
+    return redirect("/")
 
 @app.route('/contributions', methods=['GET'])
 def contributions():
@@ -217,8 +240,14 @@ def comment():
 
         # parent_id refers to the parent reply. If empty, then it's a regular comment, not a reply to a comment
         if not parent_id:
-            forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (forum_id,),False)
-            # if invalid forum_id, return home
+            title = request.form.get("title")
+            authors = request.form.get("authors")
+            thumbnail = request.form.get("thumbnail")
+            page = request.form.get("page")
+            pageCount = request.form.get("pageCount")
+
+            forumIDArray = executeSQL("SELECT * FROM chapters WHERE forum_id = ? AND title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (forum_id, title, authors, thumbnail, pageCount),False)
+            # if hidden info tampered with, return home
             if len(forumIDArray)!=1:
                 return redirect("/")
             
@@ -228,12 +257,10 @@ def comment():
 
             # retrieve info from 'upload comment' button in forum.html
             comment = request.form.get("comment")
-            title = request.form.get("title")
-            authors = request.form.get("authors")
-            thumbnail = request.form.get("thumbnail")
-            page = request.form.get("page")
-            pageCount = request.form.get("pageCount")
-
+            # if blank comment, return home
+            if not comment: 
+                return redirect("/")
+            
             # general comment, no page inputted
             if not page:
                 percent = 'N/A'
@@ -256,3 +283,9 @@ def comment():
                 
                 # return corresponding forum.html 
                 return render_template("forum.html", title=title, authors=authors, thumbnail=thumbnail, forumID = forum_id, comments = comments)
+        # reply to a comment
+        else: 
+            comment = request.form.get("comment")
+            parent_id = request.form.get("parent_id")
+            forum_id = request.form.get("forum_id")
+            

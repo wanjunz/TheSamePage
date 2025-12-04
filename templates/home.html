@@ -6,6 +6,20 @@
 
 {% block main %}
     <h1>Hello, {{username}}!</h1>
-    Here are some books you're currently reading: 
-
+    <div><strong>Here are some books you're currently reading: </strong></div>
+    
+    {% for book in booksinProg %}
+    
+    <div><img src = {{book[0][3]}}></div>
+    <div>{{book[0][0]}}</div>
+    <div>By {{book[0][1]}}</div>
+    <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
+        <form action = "/openForum" method = "POST">
+            <button class="btn btn-primary">Get Forum</button>
+        </form>
+        <form action = "/finishBook" method = "POST">
+            <button class="btn btn-primary">Mark as Read</button>
+        </form>
+    </li>  
+    {% endfor %}
 {% endblock %}
