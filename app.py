@@ -86,7 +86,9 @@ def contributions():
     user_id = session["user_id"]
     username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
     # TODO is it dangerous that we are calling their comments via their username rather than user_id? also, can they change the username in insepct to see other users' comments?
-    user_comments = executeSQL("SELECT * FROM forums WHERE username = ?", (username,), False)
+    user_comments = executeSQL("SELECT * FROM forums WHERE username = ? ORDER BY time DESC", (username,), False)
+
+    print("user_comments: ", user_comments)
     
     # combine user's comments and the book info associated into comments_info
     comments_info = []
@@ -165,7 +167,7 @@ def forum():
         row = row[0]
 
     # get comments for specific book
-    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ?", (row[2],), False)
+    comments = executeSQL("SELECT * FROM forums WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
     return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = comments, pageCount = row[4])
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -289,3 +291,17 @@ def comment():
             parent_id = request.form.get("parent_id")
             forum_id = request.form.get("forum_id")
             
+# Delete comments
+@app.route("/delete", methods = ["POST"])
+def delete():
+
+    username = request.form.get("username")
+    comment = request.form.get("comment")
+    time = request.form.get("date")
+
+    print("username:" , username)
+    print("comment", comment)
+    print("time", time)
+    executeSQL("DELETE FROM forums WHERE username = ? and comment = ? and time = ?", (username, comment, time), True)
+
+    return redirect("/contributions")

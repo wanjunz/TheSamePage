@@ -184,6 +184,11 @@ h5 {
     text-align: left;
 }
 
+.trash-can {
+    background: transparent;
+    border: none;
+}
+
 .reply-button {
     background-color: var(--dark-teal);
     color: var(--light-cream);
@@ -197,3 +202,4 @@ h5 {
 textarea{
     max-width: 600px;
 }
+
