@@ -189,6 +189,13 @@ h5 {
     border: none;
 }
 
+.reply-card {
+    background-color: transparent;
+    box-shadow: none;   
+    border: none;      
+}
+
+
 .reply-button {
     background-color: var(--dark-teal);
     color: var(--light-cream);
@@ -201,5 +208,7 @@ h5 {
 
 textarea{
     max-width: 600px;
+    border-radius: 10px; /* rounded corners */
 }
+
 
