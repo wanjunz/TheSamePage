@@ -29,7 +29,7 @@ def executeSQL(command, args, needCommit):
     connection.close()
     return val
 
-# checks if book with given information exists in google books API
+# TODO: check if book with given information exists in google books API
 def inAPI(title, authors, thumbnail, pageCount):
     return True
 
@@ -72,6 +72,46 @@ def addBook():
     inHomeBooks = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (row[2], session["user_id"]), False)
     if len(inHomeBooks)!=1:
         executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (row[2], session["user_id"], "TBR"), True)
+    return redirect("/")
+
+# remove book from user's home page
+@app.route('/deleteBook', methods = ['POST'])
+def removeBook():
+    forum_id = request.form.get("forum_id")
+    # TODO: is it possible to have one of the hidden values be empty --> may need to account in remaining methods
+    if not forum_id:
+        return redirect("/")
+    # check if forum_id, user_id pair exists in homeBooks table
+    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), False)
+    # if exists, remove book
+    if len(row)==1:
+        executeSQL("DELETE FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+    return redirect("/")
+
+# mark TBR book as currently reading on user's home page
+@app.route('/readBook', methods = ['POST'])
+def markAsReading():
+    forum_id = request.form.get("forum_id")
+    if not forum_id:
+        return redirect("/")
+    # check if forum_id, user_id pair exists in homeBooks table as TBR
+    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'TBR'", (forum_id, session["user_id"]), False)
+    # if exists, update to PROG
+    if len(row)==1:
+        executeSQL("UPDATE homeBooks SET status = 'PROG' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+    return redirect("/")
+
+# mark PROG book as done on user's home page
+@app.route('/finishBook', methods = ['POST'])
+def markAsDone():
+    forum_id = request.form.get("forum_id")
+    if not forum_id:
+        return redirect("/")
+    # check if forum_id, user_id pair exists in homeBooks table as TBR
+    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'PROG'", (forum_id, session["user_id"]), False)
+    # if exists, update to PROG
+    if len(row)==1:
+        executeSQL("UPDATE homeBooks SET status = 'DONE' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
     return redirect("/")
 
 @app.route('/contributions', methods=['GET'])
