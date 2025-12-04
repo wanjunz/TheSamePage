@@ -6,8 +6,14 @@
 
 {% block main %}
     <h1>Hello, {{username}}!</h1>
-
+    <!-- if no books in TBR, tell them to add some-->
+    {% if booksTBR|length == 0 %}
+    <div><h4>You have no books in your TBR list. Start adding them in the search tab! </h4></div>
+    {% endif %}
+    <!-- display books in TBR if exist-->
+    {% if booksTBR|length > 0 %}
     <div><h4>Here are some books in your TBR list: </h4></div>
+
     <div class = "scroll-container">
     {% for book in booksTBR %}
     <div class = "list-item">
@@ -31,7 +37,9 @@
     </div>
     {% endfor %}
     </div>
-
+    {% endif %}
+    <!-- display books currently reading-->
+    {% if booksinProg|length > 0 %}
     <div><h4>Here are some books you're currently reading: </h4></div>
     <div class = "table-wrapper">
         <table>
@@ -72,7 +80,9 @@
             </tr>
         </table>
     </div>
-    
+    {% endif %}
+    <!-- display books finished reading iff they exist-->
+    {% if booksDone|length > 0 %}
     <div><h4>Here are some books you've finished reading: </h4></div>
     <div class = "scroll-container">
     {% for book in booksDone %}
@@ -93,5 +103,5 @@
     </div>
     {% endfor %}
     </div>
-    
+    {% endif %}
 {% endblock %}
