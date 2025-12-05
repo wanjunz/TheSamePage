@@ -31,6 +31,7 @@ def executeSQL(command, args, needCommit):
 
 # TODO: check if book with given information exists in google books API
 def inAPI(title, authors, thumbnail, pageCount):
+
     return True
 
 @app.after_request
@@ -79,15 +80,15 @@ def addBook():
 @app.route('/deleteBook', methods = ['POST'])
 def removeBook():
     forum_id = request.form.get("forum_id")
-    comment_id = request.form.get("comment_id")
+    
     # TODO: is it possible to have one of the hidden values be empty --> may need to account in remaining methods
     if not forum_id:
         return redirect("/")
     # check if forum_id, user_id pair exists in homeBooks table
-    row = executeSQL("SELECT * FROM homeBooks WHERE comment_id = ? AND user_id = ?", (comment_id, session["user_id"]), False)
+    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), False)
     # if exists, remove book
     if len(row)==1:
-        executeSQL("UPDATE forums SET comment = [deleted] WHERE comment_id = ? AND user_id = ?", (comment_id, session["user_id"]), True)
+        executeSQL("DELETE FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
     return redirect("/")
 
 # mark TBR book as currently reading on user's home page
@@ -346,8 +347,8 @@ def comment():
             executeSQL("INSERT INTO forums(user_id, comment, parent_id, time, forum_id, percentage) VALUES(?, ?, ?, ?, ?, ?)", (session["user_id"], comment, parent_id, time, forum_id, parentComment[5]),True)
         return openForum()
 # Delete comments
-@app.route("/delete", methods = ["POST"])
-def delete():
+@app.route("/deleteContribution", methods = ["POST"])
+def deleteContribution():
     comment_id = request.form.get("comment_id")
     
     # Check if the comment exists first, then update the value

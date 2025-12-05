@@ -18,7 +18,7 @@
             <div class="comment-right">
                 <span class="comment-percent">Percent read: {{comment['percent']}}%</span>
                 <span class="comment-date">{{comment['date']}}</span>
-                <form action="/delete" method="post">
+                <form action="/deleteContribution" method="post">
                     <input type="hidden" name="username" value="{{comment['username']}}">
                     <input type="hidden" name="comment" value="{{comment['comment']}}">
                     <input type="hidden" name="date" value="{{comment['date']}}">
