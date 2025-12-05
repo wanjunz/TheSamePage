@@ -218,6 +218,9 @@ textarea{
     border-radius: 10px; /* rounded corners */
 }
 
+#page {
+    border-radius: 10px;
+}
 
 /* style for home page */
 

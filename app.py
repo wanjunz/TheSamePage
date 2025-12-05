@@ -79,14 +79,15 @@ def addBook():
 @app.route('/deleteBook', methods = ['POST'])
 def removeBook():
     forum_id = request.form.get("forum_id")
+    comment_id = request.form.get("comment_id")
     # TODO: is it possible to have one of the hidden values be empty --> may need to account in remaining methods
     if not forum_id:
         return redirect("/")
     # check if forum_id, user_id pair exists in homeBooks table
-    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), False)
+    row = executeSQL("SELECT * FROM homeBooks WHERE comment_id = ? AND user_id = ?", (comment_id, session["user_id"]), False)
     # if exists, remove book
     if len(row)==1:
-        executeSQL("DELETE FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+        executeSQL("UPDATE forums SET comment = [deleted] WHERE comment_id = ? AND user_id = ?", (comment_id, session["user_id"]), True)
     return redirect("/")
 
 # mark TBR book as currently reading on user's home page
@@ -137,7 +138,7 @@ def contributions():
             parentComment = executeSQL("SELECT comment FROM forums WHERE comment_id = ?", (comment[2],), False)[0][0]
         else:
             parentComment = None
-        comments_info.append({"username":username, "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author, "parentComment": parentComment})
+        comments_info.append({"username":username, "comment_id": comment[6], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author, "parentComment": parentComment})
     return render_template("contributions.html", comments_info = comments_info)
 
 @app.route('/search', methods=['POST', 'GET'])
@@ -347,11 +348,11 @@ def comment():
 # Delete comments
 @app.route("/delete", methods = ["POST"])
 def delete():
-    comment = request.form.get("comment")
-    time = request.form.get("date")
+    comment_id = request.form.get("comment_id")
     
-    row = executeSQL("SELECT * FROM forums WHERE user_id = ? and comment = ? and time = ?", (session["user_id"], comment, time), False)
+    # Check if the comment exists first, then update the value
+    row = executeSQL("SELECT * FROM forums WHERE comment_id = ?", (comment_id,), False)  
     if len(row)==1:
-        executeSQL("DELETE FROM forums WHERE user_id = ? and comment = ? and time = ?", (session["user_id"], comment, time), True)
+        executeSQL("UPDATE forums SET comment = '[deleted comment]' WHERE comment_id = ?", (comment_id,), True)
 
     return redirect("/contributions")
