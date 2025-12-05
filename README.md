@@ -6,7 +6,7 @@
 
 ### Overview
 
-Readers, rejoice! The Same Page is here for you to log all the books on your TBR list, as well as those you're currently reading and have already completed. Ever want to talk to someone about what's going on in your book but no one around you has seemed to have read it? Well, you're in luck! Just open up the corresponding forum we have on our site, release your thoughts, and continue reading! Curious about whether you should start a new book? Just pop open the forum! Want to warn others about what NOT to read? Just open up the forum! The Same Page is here for you and all your needs. 
+Readers, rejoice! The Same Page is here for you to log all the books on your TBR list, as well as those you're currently reading and have already completed. Ever want to talk to someone about what's going on in your book but no one around you has seemed to have read it? Or do you Well, you're in luck! Just open up the corresponding forum we have on our site, release your thoughts, and continue reading! Curious about whether you should start a new book? Just pop open the forum! Want to warn others about what NOT to read? Just open up the forum! The Same Page is here for you and all your needs. 
 
 ### Creating Accounts
 
