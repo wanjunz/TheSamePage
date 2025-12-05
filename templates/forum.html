@@ -26,6 +26,27 @@
             <button type = submit class = "reply-button">Upload Comment</button>
         </div>
     </form>
+    <!-- filter comments based on percentage read -->
+    <!-- Filter comments based on percentage read -->
+    <form method="get" action="/forum">
+        <input type="hidden" name="volumeID" value="{{ volumeID }}">
+
+        <label for="page_filter"><strong>Filter comments by Page Number:</strong></label>
+        <div class="input-group mb-2" style="max-width: 300px;">
+            <input type="number" min="0" max="{{ pageCount }}" name="page_filter" id="page_filter"
+                class="form-control" placeholder="Enter page number">
+            <span class="input-group-text">/ {{ pageCount }}</span>
+        </div>
+
+        <button class="btn btn-primary mt-1" type="submit">Apply Filter</button>
+    </form>
+
+    {% if filter_percent %}
+        <p class="mt-2 text-muted">
+            Showing comments for reading progress ≤ <strong>{{ filter_percent }}%</strong>
+        </p>
+    {% endif %}
+
     <!-- display existing comments -->
     <!-- structure for comments is a list of these lists comment[0][username, text, parent_id, date, forum_id, percent]-->
     {% for comment in comments %}
