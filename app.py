@@ -52,7 +52,7 @@ def default():
 # add book into user's TBR in home page from search page
 @app.route('/add', methods=['POST'])
 def addBook():
-    volumeID = request.form.get("volume_id") # book volumeID passed from search.html
+    volumeID = request.form.get("volumeID") # book volumeID passed from search.html
 
     if not volumeID:
         return "No volume id provided", 400
@@ -69,14 +69,14 @@ def addBook():
     title = info.get("title", "Unknown Title")
     authors_list = info.get("authors", "Unknown") 
     authors = ", ".join(authors_list)
-    pageCount = info.get("pageCount", "1")
+    pageCount = int(info.get("pageCount", "1"))
     thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
 
     # get corresponding book's forum id
-    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
+    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)
     if len(row)!=1:
-        executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
-        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+        executeSQL("INSERT INTO chapters (title, author, forum_id, thumbnail, pageCount) VALUES (?, ?, ?, ?, ?)", (title, authors, volumeID, thumbnail, pageCount), True)
+        row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)[0]
     else:
         row = row[0]
 
@@ -195,10 +195,14 @@ def apisearch():
                 })
     return jsonify(books)
 
-@app.route('/forum', methods=['POST'])
+@app.route('/forum', methods=['POST', 'GET'])
 def forum():
-    volumeID = request.form.get("volume_id") # book volumeID passed from search.html
-    print("VOLUME ID: ", volumeID)
+    if request.method == "POST":
+        volumeID = request.form.get("volumeID") # book volumeID passed from search.html
+    else:
+        volumeID = request.args.get("volumeID") # book volumeID passed from forum.html when user filters
+    
+    page_filter = request.args.get("page_filter")  # user-entered page number
 
     if not volumeID:
         return "No volume id provided", 400
@@ -215,20 +219,44 @@ def forum():
     title = info.get("title", "Unknown Title")
     authors_list = info.get("authors", "Unknown") 
     authors = ", ".join(authors_list)
-    pageCount = info.get("pageCount", "1")
+    pageCount = int(info.get("pageCount", "1"))
     thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
 
     if not thumbnail: # set image to cover not found image
         thumbnail = "../static/no-cover.jpg"
     # if not in table then add it
-    row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
+    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)
     if len(row)!=1:
-        executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
-        row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
+        executeSQL("INSERT INTO chapters (title, author, forum_id, thumbnail, pageCount) VALUES (?, ?, ?, ?, ?)", (title, authors, volumeID, thumbnail, pageCount), True)
+        row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)[0]
     else:
         row = row[0]
-    # get comments for specific book
-    comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
+
+    # Compute filter percentage
+    if page_filter and page_filter.isdigit():
+        page_filter = int(page_filter)
+        filter_percent = int((page_filter / pageCount) * 100)
+    else:
+        filter_percent = None
+    # RETRIEVE FILTERED COMMENTS 
+    if filter_percent is not None:
+        comments = executeSQL(
+            "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
+            "FROM forums JOIN users ON users.id = forums.user_id "
+            "WHERE forum_id = ? AND percentage <= ? "
+            "ORDER BY time DESC",
+            (row[2], filter_percent),
+            False
+        )
+    else:
+        comments = executeSQL(
+            "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
+            "FROM forums JOIN users ON users.id = forums.user_id "
+            "WHERE forum_id = ? "
+            "ORDER BY time DESC",
+            (row[2],),
+            False
+        )
     commentReplyPairs = []
     for comment in comments:
         if comment[2] is not None:
@@ -236,7 +264,7 @@ def forum():
         else:
             parentComment = None
         commentReplyPairs.append((comment, parentComment))
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = commentReplyPairs, pageCount = row[4])
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = commentReplyPairs, pageCount = row[4], volumeID = volumeID, filter_percent=filter_percent)
 
 # opens forum from home page buttons
 @app.route('/openForum', methods = ['POST'])
