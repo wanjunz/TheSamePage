@@ -30,9 +30,32 @@ def executeSQL(command, args, needCommit):
     return val
 
 # TODO: check if book with given information exists in google books API
-def inAPI(title, authors, thumbnail, pageCount):
+def inAPI(inputTitle, inputAuthors, inputThumbnail, inputPageCount):
+    clean_title = inputTitle.replace(' ', '+')
+    query = f'intitle:"{clean_title}"'
+    url = f"https://www.googleapis.com/books/v1/volumes?q={query}"
 
-    return True
+    print(url)
+    print("inputs", inputTitle, inputAuthors, inputThumbnail, inputPageCount)
+
+    response = requests.get(url)
+    data = response.json()
+
+    for item in data["items"]:
+        title = item["volumeInfo"].get("title")
+        listOfAuthors = item["volumeInfo"].get("authors")
+        authors = ', '.join(listOfAuthors) if listOfAuthors else None
+        thumbnail = item["volumeInfo"].get("imageLinks", {}).get("thumbnail")
+        pageCount = item["volumeInfo"].get("pageCount")
+        print("from api", title, authors, thumbnail, pageCount)
+        print("page ", int(pageCount) == int(inputPageCount))
+        print("title", title == inputTitle)
+        print("thumbnail", thumbnail == inputThumbnail)
+        print("authors", authors == inputAuthors)
+        if pageCount == inputPageCount and title == inputTitle and thumbnail == inputThumbnail and authors == inputAuthors:
+            return True
+    return False
+    
 
 @app.after_request
 def after_request(response):
@@ -62,12 +85,14 @@ def addBook():
     thumbnail = request.form.get("thumbnail") # book thumbnail passed from search.html
     pageCount = request.form.get("pageCount") # book page count passed from search.html
     
+    print("check if in api: ", inAPI(title, authors, thumbnail, pageCount))
     # get corresponding book's forum id
     row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)
     if len(row)!=1:
         executeSQL("INSERT INTO chapters (title, author, thumbnail, pageCount) VALUES (?, ?, ?, ?)", (title, authors, thumbnail, pageCount), True)
         row = executeSQL("SELECT * FROM chapters WHERE title = ? AND author = ? AND thumbnail = ? AND pageCount = ?", (title, authors, thumbnail, pageCount), False)[0]
     else:
+        
         row = row[0]
 
     # if not already in homeBooks, insert book into homeBooks as one of currently readings
