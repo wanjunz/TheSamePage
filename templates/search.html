@@ -68,9 +68,9 @@ Search
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
         let clean_title = clean(title);
         let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
-        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : ""; // TODO can we add the no cover found image here 
-        let pageCount = b.pageCount || 0; // TODO fix later. what happens if page count isn't available?
-
+        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "<img src='../static/no-cover.jpg' width='60'>"; 
+        let pageCount = b.pageCount || 1; // If no page count, set to 1 to avoid division by 0
+        let volume_id = b.volumeID;
         // Loop through each word searched in the query. If any of the words are in the title, then display this book
         // This is needed because Google Books API searches the subtitles too
         
@@ -85,25 +85,20 @@ Search
             <li class="d-flex gap-3 align-items-start mb-3">
                 <!-- POST form sends user to forum.html -->
                 <div>
-                    <form action="/add" method="post">
-                        <input type="hidden" name="title" value="${title}">
-                        <input type="hidden" name="authors" value="${authors}">
-                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
-                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
+                    <form action="/add" method="post">      
+                        <input type="hidden" name="volume_id" value="${volume_id}">
                         <input type="image" src="../static/AddBook.png" title="Add to TBR" alt="Add Book" width="48" height="48">
                     </form>
                 </div>
                 <div>
                     <form action="/forum" method="post">
-                        <input type="hidden" name="title" value="${title}">
-                        <input type="hidden" name="authors" value="${authors}">
-                        <input type="hidden" name="thumbnail" value="${b.thumbnail || ''}">
-                        <input type="hidden" name="pageCount" value="${pageCount || 0}">
+                        
+                        <input type = "hidden" name="volume_id" value="${volume_id}">
                         <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
                     </form>
                 </div>
                 ${img}
-                <div>
+                <div class="flex-grow-1 book-text">
                     <strong>${title}</strong><br>
                     <small>${authors}</small>
                 </div>
