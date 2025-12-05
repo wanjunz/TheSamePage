@@ -201,14 +201,14 @@ def forum():
     print("VOLUME ID: ", volumeID)
 
     if not volumeID:
-        return "No volume id provided", 400
+        return redirect("/")
     
     # Confirm the volume ID exists in Google Books
     url = f"https://www.googleapis.com/books/v1/volumes/{volumeID}"
     data = requests.get(url).json()
 
     if "error" in data:
-        return "Invalid volume ID", 404
+        return redirect("/")
     
     # Extract book information if volumeID is valid
     info = data.get("volumeInfo", {})
