@@ -34,8 +34,8 @@
                 {% for book in booksTBR %}
                 <td>
                 <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
-                    <form action = "/openForum" method = "POST">
-                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                    <form action = "/forum" method = "POST">
+                        <input name = "volumeID" type = "hidden" value = '{{book[2]}}'>
                         <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
                     </form>
                     <form action = "/readBook" method = "POST">
@@ -77,8 +77,8 @@
                 {% for book in booksinProg %}
                 <td>
                 <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
-                    <form action = "/openForum" method = "POST">
-                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'>
+                    <form action = "/forum" method = "POST">
+                        <input name = "volumeID" type = "hidden" value = '{{book[2]}}'>
                         <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
                     </form>
                     <form action = "/finishBook" method = "POST">
@@ -120,8 +120,8 @@
                 {% for book in booksDone %}
                 <td>
                 <li class="d-flex gap-3 mb-5 mt-3 align-items-center justify-content-center" >
-                    <form action = "/openForum" method = "POST">
-                        <input name = "forum_id" type = "hidden" value = '{{book[2]}}'> 
+                    <form action = "/forum" method = "POST">
+                        <input name = "volumeID" type = "hidden" value = '{{book[2]}}'> 
                         <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
                     </form>
                     <form action = "/deleteBook" method = "POST">

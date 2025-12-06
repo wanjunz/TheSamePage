@@ -20,14 +20,56 @@ Session(app)
 # Executes sql command with ? arguments 
 # needCommit True if editing table values
 def executeSQL(command, args, needCommit):
+    # creates database connection
     connection = sqlite3.connect('info.db')
+    # creates cursor object to execute commands/get data
     db = connection.cursor()
+    # run command with args (safe from SQL injection attacks)
     db.execute(command, args)
+    # gets rows from resulting query as a list
     val = db.fetchall()
+    # saves changes to database if data was edited
     if needCommit:
         connection.commit()
+    # closes connection to database
     connection.close()
     return val
+
+# checks if a volumeID is valid (in API) and if it is, inserts the book's data into chapters table
+def checkVolumeID(volumeID):
+    # no volume ID inputted
+    if not volumeID:
+        return False
+    
+    # Confirm the volume ID exists in Google Books
+    url = f"https://www.googleapis.com/books/v1/volumes/{volumeID}"
+    data = requests.get(url).json()
+
+    if "error" in data:
+        return False
+    
+    # Extract book information if volumeID is valid
+    info = data.get("volumeInfo", {})
+    title = info.get("title", "Unknown Title")
+    authors_list = info.get("authors", "Unknown") 
+    authors = ", ".join(authors_list)
+    pageCount = int(info.get("pageCount", "1"))
+    thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
+    
+    # set image to cover not found image if none in database
+    if not thumbnail:
+        thumbnail = "/static/no-cover.jpg"
+    
+    # if book not in table, then add it
+    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)
+    if len(row)!=1:
+        executeSQL("INSERT INTO chapters (title, author, forum_id, thumbnail, pageCount) VALUES (?, ?, ?, ?, ?)", (title, authors, volumeID, thumbnail, pageCount), True)
+        row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)[0]
+    else:
+        row = row[0]
+    
+    return row
+    
 
 @app.after_request
 def after_request(response):
@@ -53,106 +95,72 @@ def default():
 @app.route('/add', methods=['POST'])
 def addBook():
     volumeID = request.form.get("volumeID") # book volumeID passed from search.html
-
-    if not volumeID:
-        return "No volume id provided", 400
-    
-    # Confirm the volume ID exists in Google Books
-    url = f"https://www.googleapis.com/books/v1/volumes/{volumeID}"
-    data = requests.get(url).json()
-
-    if "error" in data:
-        return "Invalid volume ID", 404
-    
-    # Extract book information if volumeID is valid
-    info = data.get("volumeInfo", {})
-    title = info.get("title", "Unknown Title")
-    authors_list = info.get("authors", "Unknown") 
-    authors = ", ".join(authors_list)
-    pageCount = int(info.get("pageCount", "1"))
-    thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
-
-    # get corresponding book's forum id
-    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)
-    if len(row)!=1:
-        executeSQL("INSERT INTO chapters (title, author, forum_id, thumbnail, pageCount) VALUES (?, ?, ?, ?, ?)", (title, authors, volumeID, thumbnail, pageCount), True)
-        row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)[0]
-    else:
-        row = row[0]
-
-    # if not already in homeBooks, insert book into homeBooks as one of currently readings
-    inHomeBooks = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (row[2], session["user_id"]), False)
-    if len(inHomeBooks)!=1:
-        executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (row[2], session["user_id"], "TBR"), True)
+    # if volumeID is valid and 
+    if checkVolumeID(volumeID) is not False:
+        # if not already in homeBooks, insert book into homeBooks as one of currently readings
+        inHomeBooks = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (volumeID, session["user_id"]), False)
+        if len(inHomeBooks)!=1:
+            executeSQL("INSERT INTO homeBooks (forum_id, user_id, status) VALUES (?, ?, ?)", (volumeID, session["user_id"], "TBR"), True)
     return redirect("/")
 
 # remove book from user's home page
 @app.route('/deleteBook', methods = ['POST'])
 def removeBook():
     forum_id = request.form.get("forum_id")
-    
-    # TODO: is it possible to have one of the hidden values be empty --> may need to account in remaining methods
-    if not forum_id:
-        return redirect("/")
-    # check if forum_id, user_id pair exists in homeBooks table
-    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), False)
-    # if exists, remove book
-    if len(row)==1:
-        executeSQL("DELETE FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+    # forum_id not blank
+    if not(not forum_id):
+        # check if forum_id, user_id pair exists in homeBooks table
+        row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), False)
+        # if exists, remove book
+        if len(row)==1:
+            executeSQL("DELETE FROM homeBooks WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
     return redirect("/")
 
 # mark TBR book as currently reading on user's home page
 @app.route('/readBook', methods = ['POST'])
 def markAsReading():
     forum_id = request.form.get("forum_id")
-    if not forum_id:
-        return redirect("/")
-    # check if forum_id, user_id pair exists in homeBooks table as TBR
-    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'TBR'", (forum_id, session["user_id"]), False)
-    # if exists, update to PROG
-    if len(row)==1:
-        executeSQL("UPDATE homeBooks SET status = 'PROG' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+    # forum_id not blank
+    if not(not forum_id):
+        # check if forum_id, user_id pair exists in homeBooks table as TBR
+        row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'TBR'", (forum_id, session["user_id"]), False)
+        # if exists, update to PROG
+        if len(row)==1:
+            executeSQL("UPDATE homeBooks SET status = 'PROG' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
     return redirect("/")
 
 # mark PROG book as done on user's home page
 @app.route('/finishBook', methods = ['POST'])
 def markAsDone():
     forum_id = request.form.get("forum_id")
-    if not forum_id:
-        return redirect("/")
-    # check if forum_id, user_id pair exists in homeBooks table as TBR
-    row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'PROG'", (forum_id, session["user_id"]), False)
-    # if exists, update to PROG
-    if len(row)==1:
-        executeSQL("UPDATE homeBooks SET status = 'DONE' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
+    # forum_id not blank
+    if not(not forum_id):
+        # check if forum_id, user_id pair exists in homeBooks table as PROG
+        row = executeSQL("SELECT * FROM homeBooks WHERE forum_id = ? AND user_id = ? AND status = 'PROG'", (forum_id, session["user_id"]), False)
+        # if exists, update to DONE
+        if len(row)==1:
+            executeSQL("UPDATE homeBooks SET status = 'DONE' WHERE forum_id = ? AND user_id = ?", (forum_id, session["user_id"]), True)
     return redirect("/")
 
 @app.route('/contributions', methods=['GET'])
 def contributions():
-    user_id = session["user_id"]
-    username = executeSQL("SELECT username FROM users WHERE id = ?", (user_id,), False)[0][0]
+    username = executeSQL("SELECT username FROM users WHERE id = ?", (session["user_id"],), False)[0][0]
     user_comments = executeSQL("SELECT * FROM forums WHERE user_id = ? ORDER BY time DESC", (session["user_id"],), False)
  
     # combine user's comments and the book info associated into comments_info
     comments_info = []
     for comment in user_comments:
-        book_id = comment[4]
-        book_info = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (book_id,), False)
-        # book_info is a list like: [('Title', 'Author')]
-        if book_info:
-            title = book_info[0][0]
-            author = book_info[0][1]
-        else:
-            title = None
-            author = None
+        book_info = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (comment[4],), False)
+        # get comment current comment is replying to if applicable
         if comment[2] is not None:
             parentComment = executeSQL("SELECT comment FROM forums WHERE comment_id = ?", (comment[2],), False)[0][0]
         else:
             parentComment = None
-        comments_info.append({"username":username, "comment_id": comment[6], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":title, "author":author, "parentComment": parentComment})
+        comments_info.append({"username":username, "comment_id": comment[6], "comment":comment[1], "date":comment[3], "percent":comment[5] ,"title":book_info[0][0], "author":book_info[0][1], "parentComment": parentComment})
     return render_template("contributions.html", comments_info = comments_info)
 
-@app.route('/search', methods=['POST', 'GET'])
+# get search page
+@app.route('/search', methods=['GET'])
 def search():
     return render_template("search.html")
 
@@ -195,66 +203,42 @@ def apisearch():
                 })
     return jsonify(books)
 
+# opens forum from home page or search page button
 @app.route('/forum', methods=['POST', 'GET'])
 def forum():
-    if request.method == "POST":
-        volumeID = request.form.get("volumeID") # book volumeID passed from search.html
-    else:
-        volumeID = request.args.get("volumeID") # book volumeID passed from forum.html when user filters
-    
-    page_filter = request.args.get("page_filter")  # user-entered page number
-
-    if not volumeID:
+    volumeID = request.args.get("volumeID") # passed from forum.html when user filters
+    if volumeID is None: 
+        volumeID = request.form.get("volumeID") # passed from search.html or from comments being posted
+    # verify volumeID hasn't been tampered with
+    row = checkVolumeID(volumeID)
+    if row == False:
         return redirect("/")
-    
-    # Confirm the volume ID exists in Google Books
-    url = f"https://www.googleapis.com/books/v1/volumes/{volumeID}"
-    data = requests.get(url).json()
-
-    if "error" in data:
-        return redirect("/")
-    
-    # Extract book information if volumeID is valid
-    info = data.get("volumeInfo", {})
-    title = info.get("title", "Unknown Title")
-    authors_list = info.get("authors", "Unknown") 
-    authors = ", ".join(authors_list)
-    pageCount = int(info.get("pageCount", "1"))
-    thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
-
-    if not thumbnail: # set image to cover not found image
-        thumbnail = "../static/no-cover.jpg"
-    # if not in table then add it
-    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)
-    if len(row)!=1:
-        executeSQL("INSERT INTO chapters (title, author, forum_id, thumbnail, pageCount) VALUES (?, ?, ?, ?, ?)", (title, authors, volumeID, thumbnail, pageCount), True)
-        row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (volumeID,), False)[0]
-    else:
-        row = row[0]
 
     # Compute filter percentage
+    page_filter = request.args.get("page_filter")  # user-entered page number
     if page_filter and page_filter.isdigit():
         page_filter = int(page_filter)
         filter_percent = int((page_filter / pageCount) * 100)
     else:
         filter_percent = None
+
     # RETRIEVE FILTERED COMMENTS 
     if filter_percent is not None:
         comments = executeSQL(
             "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
             "FROM forums JOIN users ON users.id = forums.user_id "
-            "WHERE forum_id = ? AND percentage <= ? "
+            "WHERE forum_id = ? AND percentage <= ? AND comment != '[deleted comment]'"
             "ORDER BY time DESC",
-            (row[2], filter_percent),
+            (volumeID, filter_percent),
             False
         )
     else:
         comments = executeSQL(
             "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
             "FROM forums JOIN users ON users.id = forums.user_id "
-            "WHERE forum_id = ? "
+            "WHERE forum_id = ? AND comment != '[deleted comment]'"
             "ORDER BY time DESC",
-            (row[2],),
+            (volumeID,),
             False
         )
     commentReplyPairs = []
@@ -264,31 +248,7 @@ def forum():
         else:
             parentComment = None
         commentReplyPairs.append((comment, parentComment))
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = commentReplyPairs, pageCount = row[4], volumeID = volumeID, filter_percent=filter_percent)
-
-# opens forum from home page buttons
-@app.route('/openForum', methods = ['POST'])
-def openForum():
-    forum_id = request.form.get("forum_id")
-    # forum_id blank
-    if not forum_id:
-        return redirect("/")
-    # check forum_id exists in table
-    row = executeSQL("SELECT * FROM chapters WHERE forum_id = ?", (forum_id,), False)
-    if len(row)!=1:
-        return redirect("/")
-    else:
-        row = row[0]
-    # get comments for specific book
-    comments = executeSQL("SELECT username, comment, parent_id, time, forum_id, percentage, comment_id FROM forums JOIN users ON users.id = forums.user_id WHERE forum_id = ? ORDER BY time DESC", (row[2],), False)
-    commentReplyPairs = []
-    for comment in comments:
-        if comment[2] is not None:
-            parentComment = executeSQL("SELECT comment FROM forums WHERE comment_id = ?", (comment[2],), False)[0][0]
-        else:
-            parentComment = None
-        commentReplyPairs.append((comment, parentComment))
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = row[2], comments = commentReplyPairs, pageCount = row[4])
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = volumeID, comments = commentReplyPairs, pageCount = row[4], filter_percent = filter_percent)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -339,6 +299,7 @@ def register():
         except:
             return render_template("register.html", message = "username taken")
         return render_template("login.html")
+    # open register page
     if request.method == "GET":
         return render_template("register.html")
 
@@ -357,7 +318,7 @@ def comment():
     # adds user comment to database and then shows page with it on
     if request.method == "POST":
         parent_id = request.form.get("parent_id")
-        forum_id = request.form.get("forum_id")
+        forum_id = request.form.get("volumeID")
 
         # retrieve info from 'upload comment' button in forum.html
         comment = request.form.get("comment")
@@ -375,7 +336,6 @@ def comment():
         time = datetime.now().strftime("%m/%d/%Y, %H:%M")
         # parent_id refers to the parent reply. If empty, then it's a regular comment, not a reply to a comment
         if not parent_id:
-            print("not a reply")
             page = request.form.get("page")
 
             # general comment, no page inputted
@@ -388,26 +348,29 @@ def comment():
                 page = float(page)
                 pageCount = float(forumIDArray[4])
                 percent = str(round(page * 100/pageCount))
-
+                # TODO: fix pages
+        
             executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (session["user_id"], comment, time, forum_id, percent), True)   
 
         # reply to a comment
         else: 
-            # hidden data tampered with
+            # check if hidden data tampered with
             parentComment = executeSQL("SELECT * FROM forums WHERE comment_id = ? AND forum_id = ?", (parent_id, forum_id), False)
             if len(parentComment)!=1:
                 return redirect("/")
             parentComment=parentComment[0]
+            # if parentid, forumid pair exist then add reply into forums table
             executeSQL("INSERT INTO forums(user_id, comment, parent_id, time, forum_id, percentage) VALUES(?, ?, ?, ?, ?, ?)", (session["user_id"], comment, parent_id, time, forum_id, parentComment[5]),True)
-        return openForum()
+        # open corresponding forum
+        return forum()
+
 # Delete comments
 @app.route("/deleteContribution", methods = ["POST"])
 def deleteContribution():
     comment_id = request.form.get("comment_id")
-    
-    # Check if the comment exists first, then update the value
-    row = executeSQL("SELECT * FROM forums WHERE comment_id = ?", (comment_id,), False)  
+
+    # Check if the comment exists first for the user, then update the value
+    row = executeSQL("SELECT * FROM forums WHERE comment_id = ? AND user_id = ?", (comment_id,session["user_id"]), False)  
     if len(row)==1:
         executeSQL("UPDATE forums SET comment = '[deleted comment]' WHERE comment_id = ?", (comment_id,), True)
-
     return redirect("/contributions")
