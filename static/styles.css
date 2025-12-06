@@ -95,11 +95,11 @@ body {
 /* styling for comments */
 
 /* comment box in forum.html */
-textarea{
+textarea {
     width: 80vw;
 }
 
-.type-comment-box{
+.type-comment-box {
     background: var(--light-teal);
     padding: 25px;
     border-radius: 25px;
@@ -108,7 +108,7 @@ textarea{
     max-width: 700px;   
 }
 
-.author{
+.author {
     font-weight: bold;
     color: var(--light-teal);
 }
@@ -223,7 +223,7 @@ h5 {
     margin-top: 10px;
 }
 
-textarea{
+textarea {
     max-width: 600px;
     border-radius: 6px; /* rounded corners */
 }
@@ -263,12 +263,11 @@ table{
     border-spacing: 40px 0
 }  
 
-table td{
+table td {
     vertical-align: top;
     word-wrap: break-word;
     max-width: 200px;
 }
-  
 
 .book-text {
     text-align: left !important;
@@ -283,7 +282,6 @@ table td{
 #page_filter {
     margin-left: 10px;
     border-radius: 6px;
-    
     max-width: 120px !important; /* overrides bootstrap */
 }
 
@@ -291,6 +289,6 @@ table td{
     max-width: 200px;
 }
 
-#page_filter_text{
+#page_filter_text {
     margin-top: 6px;
 }
