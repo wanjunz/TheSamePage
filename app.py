@@ -218,9 +218,17 @@ def forum():
     pageCount = int(row[4])
     # Compute filter percentage
     print("pageCount:", pageCount)
+
     page_filter = request.args.get("page_filter")  # user-entered page number
-    if page_filter and page_filter.isdigit():
-        page_filter = int(page_filter)
+    
+    
+    print("page_filter:", page_filter)
+    if page_filter:
+        # Check if user inputted an integer as page count
+        try:
+            page_filter = int(page_filter)
+        except ValueError as e: 
+            return redirect("/")
         filter_percent = int((page_filter / pageCount) * 100)
     else:
         filter_percent = None
@@ -251,7 +259,7 @@ def forum():
         else:
             parentComment = None
         commentReplyPairs.append((comment, parentComment))
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = volumeID, comments = commentReplyPairs, pageCount = pageCount, filter_percent = filter_percent)
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = volumeID, comments = commentReplyPairs, pageCount = pageCount, filter_percent = filter_percent, page_filter=page_filter)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
