@@ -32,9 +32,11 @@ Once you access a book's forum page, you'll be able to see all comments (with re
 
 If you would not like to reply to someone else's comment, but instead start your own thread for a comment, simply use the text box at the top of the page, directly under the book's cover photo! Type your comment in the box and if you'd like to add the page you're currently on when making the comment, feel free to do so! Afterwards, just press the upload comment button and you should see your comment on the thread. 
 
+You can also filter through the comments so you don't see any spoilers or comments made from users who are further along in the book than you. Simply input the page number you want to see comments up to and then press 'enter'. 
+
 ### Contributions
 
-Want to remove a comment you've previously posted? No worries, just visit the contributions page to view all of the comments you've posted on any one of our forums. Then, click the trash button at the top right corner of the corresponding button and your comment will be deleted from our forums. 
+Want to remove a comment you've previously posted? No worries, just visit the contributions page to view all of the comments you've posted on any one of our forums. Then, click the trash button at the top right corner of the corresponding button and your comment will be marked as '[deleted comment]'.
 
 ### Log Out
 
