@@ -49,7 +49,7 @@
         var pageCount = "{{ pageCount | tojson }}";
 
         filterInput.addEventListener("change", function () {
-            if (filterInput.value > 0 && filterInput.value <= int(pageCount)) {
+            if (filterInput.value >= 0 && filterInput.value <= int(pageCount)) {
                 filterForm.submit();
             } else
             {
