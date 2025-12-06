@@ -61,26 +61,16 @@ Search
     let html = "";
     // Loop through the books returned from API and retrieve the titles, authors, and covers 
     for (let b of books) {
+        // Used to check if any query words are in the title
+        var titleQueryCheck = true;
 
         // Retrieve info about the books
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
         let clean_title = clean(title);
         let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
-
         let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "<img src='/static/no-cover.jpg' width='60'>"; 
-        let pageCount = b.pageCount; 
+        let pageCount = b.pageCount;
         let volume_id = b.volumeID;
-
-        // Used to check if any query words are in the title 
-        var titleQueryCheck = true;
-        // Check if the book has a page count
-        if (pageCount == 0 || pageCount == null) {
-            pageCountCheck = False;
-        }
-        else {
-            pageCountCheck = True;
-        }
-
         // Loop through each word searched in the query. If any of the words are in the title, then display this book
         // This is needed because Google Books API searches the subtitles too
         
@@ -90,7 +80,7 @@ Search
                 break;
             }
         }
-        if (titleQueryCheck && pageCountCheck) {
+        if (titleQueryCheck) {
             html += `
             <li class="d-flex gap-3 align-items-start mb-3">
                 <!-- POST form sends user to forum.html -->
