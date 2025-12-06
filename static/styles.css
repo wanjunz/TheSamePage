@@ -99,6 +99,15 @@ textarea{
     width: 80vw;
 }
 
+.type-comment-box{
+    background: var(--light-teal);
+    padding: 25px;
+    border-radius: 25px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin: 40px auto;      /* centers the box */
+    max-width: 700px;   
+}
+
 .author{
     font-weight: bold;
     color: var(--light-teal);
@@ -211,15 +220,16 @@ h5 {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
 textarea{
     max-width: 600px;
-    border-radius: 10px; /* rounded corners */
+    border-radius: 6px; /* rounded corners */
 }
 
 #page {
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
 /* style for home page */
@@ -262,4 +272,25 @@ table td{
 
 .book-text {
     text-align: left !important;
+}
+
+.page_filter_style {
+    display: flex;
+    justify-content: center;
+    padding-top: 15px;
+}
+
+#page_filter {
+    margin-left: 10px;
+    border-radius: 6px;
+    
+    max-width: 120px !important; /* overrides bootstrap */
+}
+
+.input-group {
+    max-width: 200px;
+}
+
+#page_filter_text{
+    margin-top: 6px;
 }

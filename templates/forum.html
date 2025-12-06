@@ -12,34 +12,53 @@
     </div>
     <!-- submit comment for overall forum -->
     <form action = "/comment" method ="post">
-        <div class = "type-comment">
-            <textarea name = "comment" placeholder = "type comment here"></textarea>
-        </div>
-        <div class = "mb-3">
-            <!-- Values needed to display comment-->
-            Currently reading page
-            <input name = "page" id = page type = "number" min="0" max = {{pageCount}} oninput="validity.valid||(value='');">
-            out of {{pageCount}} total pages (if applicable)
-            <input name = "volumeID" type = "hidden" value = '{{forumID}}'> 
-        </div>
-        <div class = "mb-3">
-            <button type = submit class = "reply-button">Upload Comment</button>
+        <div class = "type-comment-box">
+            <div class = "type-comment">
+                <textarea name = "comment" placeholder = "type comment here"></textarea>
+            </div>
+            <div class = "mb-3">
+                <!-- Values needed to display comment-->
+                Currently reading page
+                <input name = "page" id = page type = "number" min="0" max = {{pageCount}} oninput="validity.valid||(value='');">
+                out of {{pageCount}} total pages (if applicable)
+                <input name = "volumeID" type = "hidden" value = '{{forumID}}'> 
+            </div>
+            <div class = "mb-3">
+                <button type = submit class = "reply-button">Upload Comment</button>
+            </div>
         </div>
     </form>
     <!-- Filter comments based on percentage read -->
-    <form method="get" action="/forum">
+    <form id = "filterForm" method="get" action="/forum">
         <input type="hidden" name="volumeID" value="{{ forumID }}">
-
-        <label for="page_filter"><strong>Filter comments by Page Number:</strong></label>
-        <div class="input-group mb-2" style="max-width: 300px;">
-            <input type="number" min="0" max="{{ pageCount }}" name="page_filter" id="page_filter"
-                class="form-control" placeholder="Enter page number">
-            <span class="input-group-text">/ {{ pageCount }}</span>
-            <button class="btn btn-primary mt-1 reply-button" type="submit">Apply Filter</button>
+        <div class = "page_filter_style">
+            <label for="page_filter" id = "page_filter_text"><strong>Filter comments by Page Number:</strong></label>
+            <div class="input-group mb-2" style="max-width: 300px;">
+                <input type="number" min="0" max="{{ pageCount }}" name="page_filter" id="page_filter"
+                    class="form-control" placeholder="{{ page_filter if page_filter else 'Enter page number' }}"> 
+                <span class="input-group-text">/ {{ pageCount }}</span>
+            </div>
         </div>
 
-        
     </form>
+
+    <script>
+        // Auto-submit form when user types a number and clicks out of the input box
+        const filterInput = document.getElementById("page_filter");
+        const filterForm = document.getElementById("filterForm");
+        var pageCount = "{{ pageCount | tojson }}";
+
+        filterInput.addEventListener("change", function () {
+            if (filterInput.value > 0 && filterInput.value <= int(pageCount)) {
+                filterForm.submit();
+            } else
+            {
+                // If input is invalid, clear the input field
+                filterInput.value = '';
+            }
+            
+        });
+    </script>
 
     {% if filter_percent %}
         <p class="mt-2 text-muted">
