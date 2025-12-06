@@ -221,7 +221,6 @@ def forum():
 
     page_filter = request.args.get("page_filter")  # user-entered page number
     
-    
     print("page_filter:", page_filter)
     if page_filter:
         # Check if user inputted an integer as page count
@@ -238,7 +237,7 @@ def forum():
         comments = executeSQL(
             "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
             "FROM forums JOIN users ON users.id = forums.user_id "
-            "WHERE forum_id = ? AND percentage <= ? AND comment != '[deleted comment]'"
+            "WHERE forum_id = ? AND CAST(percentage AS INTEGER) <= ? AND comment != '[deleted comment]' "
             "ORDER BY time DESC",
             (volumeID, filter_percent),
             False
@@ -247,7 +246,7 @@ def forum():
         comments = executeSQL(
             "SELECT username, comment, parent_id, time, forum_id, percentage, comment_id "
             "FROM forums JOIN users ON users.id = forums.user_id "
-            "WHERE forum_id = ? AND comment != '[deleted comment]'"
+            "WHERE forum_id = ? AND comment != '[deleted comment]' "
             "ORDER BY time DESC",
             (volumeID,),
             False
