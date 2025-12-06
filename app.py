@@ -51,9 +51,9 @@ def checkVolumeID(volumeID):
     # Extract book information if volumeID is valid
     info = data.get("volumeInfo", {})
     title = info.get("title", "Unknown Title")
-    authors_list = info.get("authors", "Unknown") 
+    authors_list = info.get("authors", ["Unknown Author"]) 
     authors = ", ".join(authors_list)
-    pageCount = int(info.get("pageCount", "1"))
+    pageCount = int(info.get("pageCount"))
     thumbnail = info.get("imageLinks", {}).get("thumbnail", '')
     
     # set image to cover not found image if none in database
