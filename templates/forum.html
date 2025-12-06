@@ -28,16 +28,17 @@
     </form>
     <!-- Filter comments based on percentage read -->
     <form method="get" action="/forum">
-        <input type="hidden" name="volumeID" value="{{ forum_id }}">
+        <input type="hidden" name="volumeID" value="{{ forumID }}">
 
         <label for="page_filter"><strong>Filter comments by Page Number:</strong></label>
         <div class="input-group mb-2" style="max-width: 300px;">
             <input type="number" min="0" max="{{ pageCount }}" name="page_filter" id="page_filter"
                 class="form-control" placeholder="Enter page number">
             <span class="input-group-text">/ {{ pageCount }}</span>
+            <button class="btn btn-primary mt-1 reply-button" type="submit">Apply Filter</button>
         </div>
 
-        <button class="btn btn-primary mt-1" type="submit">Apply Filter</button>
+        
     </form>
 
     {% if filter_percent %}

@@ -211,17 +211,20 @@ def forum():
         volumeID = request.form.get("volumeID") # passed from search.html or from comments being posted
     # verify volumeID hasn't been tampered with
     row = checkVolumeID(volumeID)
+    print("row:", row)
     if row == False:
         return redirect("/")
 
+    pageCount = int(row[4])
     # Compute filter percentage
+    print("pageCount:", pageCount)
     page_filter = request.args.get("page_filter")  # user-entered page number
     if page_filter and page_filter.isdigit():
         page_filter = int(page_filter)
         filter_percent = int((page_filter / pageCount) * 100)
     else:
         filter_percent = None
-
+    print("filter_percent:", filter_percent)
     # RETRIEVE FILTERED COMMENTS 
     if filter_percent is not None:
         comments = executeSQL(
@@ -248,7 +251,7 @@ def forum():
         else:
             parentComment = None
         commentReplyPairs.append((comment, parentComment))
-    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = volumeID, comments = commentReplyPairs, pageCount = row[4], filter_percent = filter_percent)
+    return render_template("forum.html", title=row[0], authors=row[1], thumbnail=row[3], forumID = volumeID, comments = commentReplyPairs, pageCount = pageCount, filter_percent = filter_percent)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
