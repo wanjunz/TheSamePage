@@ -68,7 +68,7 @@ Search
         let title = b.title.replace("<", "&lt;").replace(">", "&gt;");
         let clean_title = clean(title);
         let authors = b.authors.join(", ") || "Unknown"; // If no authors, display "Unknown"
-        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "<img src='../static/no-cover.jpg' width='60'>"; 
+        let img = b.thumbnail ? `<img src="${b.thumbnail}" width="60">` : "<img src='/static/no-cover.jpg' width='60'>"; 
         let pageCount = b.pageCount || 1; // If no page count, set to 1 to avoid division by 0
         let volume_id = b.volumeID;
         // Loop through each word searched in the query. If any of the words are in the title, then display this book
@@ -87,14 +87,14 @@ Search
                 <div>
                     <form action="/add" method="post">      
                         <input type="hidden" name="volumeID" value="${volume_id}">
-                        <input type="image" src="../static/AddBook.png" title="Add to TBR" alt="Add Book" width="48" height="48">
+                        <input type="image" src="/static/AddBook.png" title="Add to TBR" alt="Add Book" width="48" height="48">
                     </form>
                 </div>
                 <div>
                     <form action="/forum" method="post">
                         
                         <input type = "hidden" name="volumeID" value="${volume_id}">
-                        <input type="image" src="../static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
+                        <input type="image" src="/static/AccessForum.png" title="Access Forum" alt="Access Forum" width="48" height="48">
                     </form>
                 </div>
                 ${img}
