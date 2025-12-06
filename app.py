@@ -347,12 +347,12 @@ def comment():
 
             # comment with page progress inputted
             else:
-                # caclulate percent read
-                page = float(page)
                 pageCount = float(forumIDArray[4])
-                percent = str(round(page * 100/pageCount))
-                # TODO: fix pages
-        
+                # caclulate percent read iff page is a number between 0 and pageCount (inclusive)
+                if not(page.isdigit() and float(page) <= pageCount):
+                    return forum()
+                page = float(page)
+                percent = str(round(page * 100/pageCount))        
             executeSQL("INSERT INTO forums(user_id, comment, time, forum_id, percentage) VALUES (?,?,?,?,?)", (session["user_id"], comment, time, forum_id, percent), True)   
 
         # reply to a comment
@@ -371,7 +371,6 @@ def comment():
 @app.route("/deleteContribution", methods = ["POST"])
 def deleteContribution():
     comment_id = request.form.get("comment_id")
-
     # Check if the comment exists first for the user, then update the value
     row = executeSQL("SELECT * FROM forums WHERE comment_id = ? AND user_id = ?", (comment_id,session["user_id"]), False)  
     if len(row)==1:
