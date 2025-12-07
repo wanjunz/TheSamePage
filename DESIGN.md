@@ -25,7 +25,7 @@ Our search function queries the Google Books API (documentation here: https://de
 ### forum.html
 Two ways to access the forum.html page are through the homepage when the user clicks on the 'Access Forum' icon or when they find a book via search.html. The book's volume ID is passed through as a hidden input and then we use the volume ID to call and display the rest of the book's information, including title, authors, and book cover. We chose to use the volume ID because each book has a unique volume ID in the Google Books API. In "app.py", we have conditionals to check if the user tried changing the volume ID through 'inspect'. We only add books to our chapters table after confirming that the book exists in the Google Books API through the volume ID passed in. 
 
-The user can filter through the comments on the forums page to see comments up to the page number that the user has filtered for. We used Javacsript so the filter form submits when the user changes the value in the input box and clicks out of the input box or hits 'enter'. 
+The user can filter through the comments on the forums page to see comments up to the page number that the user has filtered for. We used Javacsript so the filter form submits when the user changes the value in the input box and hits 'enter'. 
 
 ### contributions.html
 We decided to implement the 'delete' function by updating the comment text to '[deleted comment]' instead of deleting the comment from our database to ensure the integrity of our database and the comment_id increment. The user will still see their deleted comments in their contributions page, but their comment will no longer appear in the corresponding forum page.

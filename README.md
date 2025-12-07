@@ -2,7 +2,7 @@
 
 ### Ashley Zhu and Alyssa Zhou
 
-### Video Link: [Click Here](https://www.youtube.com/)
+### Video Link: [Click Here](https://www.youtube.com/watch?v=aqSEL6P9jsM)
 
 ### Overview
 
